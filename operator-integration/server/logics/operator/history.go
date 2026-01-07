@@ -177,7 +177,7 @@ func (m *operatorManager) QueryOperatorHistoryList(ctx context.Context, req *int
 }
 
 // 组装算子信息结果
-func (m *operatorManager) assembleReleaseResult(ctx context.Context, releaseDB *model.OperatorReleaseDB, metadataDB interfaces.Metadata) (
+func (m *operatorManager) assembleReleaseResult(ctx context.Context, releaseDB *model.OperatorReleaseDB, metadataDB interfaces.IMetadataDB) (
 	userIDs []string, info *interfaces.OperatorDataInfo, err error) {
 	executeControl := &interfaces.OperatorExecuteControl{}
 	err = jsoniter.Unmarshal([]byte(releaseDB.ExecuteControl), executeControl)

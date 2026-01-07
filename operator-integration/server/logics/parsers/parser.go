@@ -15,7 +15,7 @@ type Parser interface {
 	// Type 返回解析器处理的元数据类型
 	Type() interfaces.MetadataType
 	// Parse 解析原始输入为元数据
-	Parse(ctx context.Context, input any) ([]interfaces.Metadata, error)
+	Parse(ctx context.Context, input any) ([]interfaces.IMetadataDB, error)
 	// GetAllContent 获取所有内容
 	GetAllContent(ctx context.Context, input any) (any, error)
 }

@@ -57,7 +57,7 @@ func (m *operatorManager) GetOperatorInfoByOperatorID(ctx context.Context, req *
 
 // getOperatorInfo 获取算子信息
 func (m *operatorManager) getOperatorRegisterInfo(ctx context.Context, operatorID string) (operator *model.OperatorRegisterDB,
-	metadataDB interfaces.Metadata, err error) {
+	metadataDB interfaces.IMetadataDB, err error) {
 	// 查询算子信息
 	has, operator, err := m.DBOperatorManager.SelectByOperatorID(ctx, nil, operatorID)
 	if err != nil {
@@ -126,7 +126,7 @@ func (m *operatorManager) GetOperatorQueryPage(ctx context.Context, req *interfa
 	result.Data = []*interfaces.OperatorDataInfo{}
 	for _, operator := range operatorList {
 		// 查询算子元数据信息
-		var metadataDB interfaces.Metadata
+		var metadataDB interfaces.IMetadataDB
 		var ok bool
 		metadataDB, ok = sourceIDToMetadataMap[operator.MetadataVersion]
 		if !ok {
@@ -276,7 +276,7 @@ func (m *operatorManager) queryOperatorConfigList(ctx context.Context, req *inte
 }
 
 // 组装算子信息结果
-func (m *operatorManager) assembleOperatorResult(ctx context.Context, operator *model.OperatorRegisterDB, metadataDB interfaces.Metadata) (
+func (m *operatorManager) assembleOperatorResult(ctx context.Context, operator *model.OperatorRegisterDB, metadataDB interfaces.IMetadataDB) (
 	userIDs []string, result *interfaces.OperatorDataInfo, err error) {
 	executeControl := &interfaces.OperatorExecuteControl{}
 	err = jsoniter.Unmarshal([]byte(operator.ExecuteControl), executeControl)

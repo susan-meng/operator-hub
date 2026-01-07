@@ -36,7 +36,7 @@ func (m *operatorManager) RegisterInternalOperator(ctx context.Context, req *int
 		return
 	}
 	// 解析元数据
-	var metadataList []interfaces.Metadata
+	var metadataList []interfaces.IMetadataDB
 	switch req.MetadataType {
 	case interfaces.MetadataTypeAPI:
 		metadataList, err = m.MetadataService.ParseMetadata(ctx, req.MetadataType, req.OpenAPIInput)
@@ -45,7 +45,7 @@ func (m *operatorManager) RegisterInternalOperator(ctx context.Context, req *int
 			return
 		}
 	case interfaces.MetadataTypeFunc:
-		var metadatas []interfaces.Metadata
+		var metadatas []interfaces.IMetadataDB
 		for _, funcInput := range req.Functions {
 			metadatas, err = m.MetadataService.ParseMetadata(ctx, req.MetadataType, funcInput)
 			if err != nil {
@@ -65,14 +65,7 @@ func (m *operatorManager) RegisterInternalOperator(ctx context.Context, req *int
 	if err != nil {
 		return
 	}
-	// metdataParam := &interfaces.APIMetadataEdit{
-	// 	Summary:     item.Summary,
-	// 	Path:        item.Path,
-	// 	Method:      item.Method,
-	// 	Description: item.Description,
-	// 	APISpec:     item.APISpec,
-	// 	ServerURL:   item.ServerURL,
-	// }
+
 	checkConfig := &interfaces.IntCompConfig{
 		ComponentType: interfaces.ComponentTypeOperator,
 		ComponentID:   req.OperatorID,
@@ -151,7 +144,7 @@ func (m *operatorManager) RegisterInternalOperator(ctx context.Context, req *int
 
 // 创建内置算子
 func (m *operatorManager) createInternalOperator(ctx context.Context, tx *sql.Tx, operatorDB *model.OperatorRegisterDB,
-	metadataDB interfaces.Metadata, config *interfaces.IntCompConfig, userID, businessDomainId string) (resp *interfaces.OperatorRegisterResp, err error) {
+	metadataDB interfaces.IMetadataDB, config *interfaces.IntCompConfig, userID, businessDomainId string) (resp *interfaces.OperatorRegisterResp, err error) {
 	// 记录可观测
 	ctx, _ = o11y.StartInternalSpan(ctx)
 	defer o11y.EndSpan(ctx, err)
@@ -247,7 +240,7 @@ func (m *operatorManager) createInternalOperator(ctx context.Context, tx *sql.Tx
 
 // 升级内置算子
 func (m *operatorManager) upgradeInternalOperator(ctx context.Context, tx *sql.Tx, operatorDB *model.OperatorRegisterDB,
-	metadataDB interfaces.Metadata, config *interfaces.IntCompConfig, name, userID string) (resp *interfaces.OperatorRegisterResp, err error) {
+	metadataDB interfaces.IMetadataDB, config *interfaces.IntCompConfig, name, userID string) (resp *interfaces.OperatorRegisterResp, err error) {
 	// 记录可观测
 	ctx, _ = o11y.StartInternalSpan(ctx)
 	defer o11y.EndSpan(ctx, err)

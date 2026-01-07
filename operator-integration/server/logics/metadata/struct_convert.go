@@ -7,7 +7,7 @@ import (
 )
 
 // MetadataDBToStruct 将数据库模型转换为元数据接口
-func MetadataDBToStruct(metadataDB interfaces.Metadata) *interfaces.MetadataInfo {
+func MetadataDBToStruct(metadataDB interfaces.IMetadataDB) *interfaces.MetadataInfo {
 	switch v := metadataDB.(type) {
 	case *model.FunctionMetadataDB:
 		apiMetadataDB := &model.APIMetadataDB{

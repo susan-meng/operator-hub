@@ -41,7 +41,7 @@ func (op *openAPIParser) validate(ctx context.Context, inputValue any) (input *i
 }
 
 // Parse 解析OpenAPI元数据
-func (op *openAPIParser) Parse(ctx context.Context, inputValue any) (metadata []interfaces.Metadata, err error) {
+func (op *openAPIParser) Parse(ctx context.Context, inputValue any) (metadata []interfaces.IMetadataDB, err error) {
 	// 记录可观测性
 	ctx, _ = o11y.StartInternalSpan(ctx)
 	defer o11y.EndSpan(ctx, err)
@@ -49,7 +49,7 @@ func (op *openAPIParser) Parse(ctx context.Context, inputValue any) (metadata []
 	if err != nil {
 		return nil, err
 	}
-	metadata = make([]interfaces.Metadata, 0)
+	metadata = make([]interfaces.IMetadataDB, 0)
 	content, err := op.getAllContent(ctx, input.Data)
 	if err != nil {
 		return nil, err

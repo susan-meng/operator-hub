@@ -100,6 +100,13 @@ type HTTPRouter struct {
 	Method string `json:"method" validate:"required"`
 }
 
+// APIRouter API路由
+// @description: API路由
+type APIRouter struct {
+	ServerURL  string `json:"server_url" validate:"required"` // 服务器URL
+	HTTPRouter `json:",inline"`
+}
+
 // HTTPRequestParams HTTP请求参数
 type HTTPRequestParams struct {
 	Headers     map[string]any    `json:"header"`

@@ -306,6 +306,20 @@ func (mr *MockAgentOperatorAppMockRecorder) CreateMCPInstance(ctx, req any) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateMCPInstance", reflect.TypeOf((*MockAgentOperatorApp)(nil).CreateMCPInstance), ctx, req)
 }
 
+// DeleteAllMCPInstances mocks base method.
+func (m *MockAgentOperatorApp) DeleteAllMCPInstances(ctx context.Context, mcpID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteAllMCPInstances", ctx, mcpID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteAllMCPInstances indicates an expected call of DeleteAllMCPInstances.
+func (mr *MockAgentOperatorAppMockRecorder) DeleteAllMCPInstances(ctx, mcpID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAllMCPInstances", reflect.TypeOf((*MockAgentOperatorApp)(nil).DeleteAllMCPInstances), ctx, mcpID)
+}
+
 // DeleteMCPInstance mocks base method.
 func (m *MockAgentOperatorApp) DeleteMCPInstance(ctx context.Context, mcpID string, mcpVersion int) error {
 	m.ctrl.T.Helper()
@@ -333,6 +347,21 @@ func (m *MockAgentOperatorApp) UpdateMCPInstance(ctx context.Context, mcpID stri
 func (mr *MockAgentOperatorAppMockRecorder) UpdateMCPInstance(ctx, mcpID, mcpVersion, req any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMCPInstance", reflect.TypeOf((*MockAgentOperatorApp)(nil).UpdateMCPInstance), ctx, mcpID, mcpVersion, req)
+}
+
+// UpgradeMCPInstance mocks base method.
+func (m *MockAgentOperatorApp) UpgradeMCPInstance(ctx context.Context, req *interfaces.MCPInstanceCreateRequest) (*interfaces.MCPInstanceCreateResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpgradeMCPInstance", ctx, req)
+	ret0, _ := ret[0].(*interfaces.MCPInstanceCreateResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpgradeMCPInstance indicates an expected call of UpgradeMCPInstance.
+func (mr *MockAgentOperatorAppMockRecorder) UpgradeMCPInstance(ctx, req any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpgradeMCPInstance", reflect.TypeOf((*MockAgentOperatorApp)(nil).UpgradeMCPInstance), ctx, req)
 }
 
 // MockAuthorization is a mock of Authorization interface.
