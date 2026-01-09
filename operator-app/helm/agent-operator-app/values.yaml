@@ -23,7 +23,7 @@ image:
 service:
   podID: "POD_ID" # 使用PODID作为machineID, 这里填写podID环境变量名
   machineID: ""
-  ingressclassname: "class-443"
+
   agentOperatorApp:
     nodePort: 31023
     ingress:
@@ -56,6 +56,8 @@ service:
     failureThreshold: 30
 
 depServices:
+  class-443:
+    ingressClass: class-443
   rds:
     type: mysql
     host: 127.0.0.1

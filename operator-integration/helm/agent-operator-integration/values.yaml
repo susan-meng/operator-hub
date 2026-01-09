@@ -24,7 +24,7 @@ service:
   podID: "POD_ID" # 使用PODID作为machineID, 这里填写podID环境变量名
   name: "agent-operator-integration"
   machineID: ""
-  ingressclassname: "class-443"
+
   agentOperatorIntegration:
     nodePort: 31023
     ingress:
@@ -70,6 +70,8 @@ service:
     clientLifetime: 600 # 单位秒
 
 depServices:
+  class-443:
+    ingressClass: class-443
   mq: {}
   rds:
     type: mysql
