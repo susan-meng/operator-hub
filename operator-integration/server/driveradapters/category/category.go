@@ -3,12 +3,12 @@ package category
 import (
 	"net/http"
 
-	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
-	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/rest"
-	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	"github.com/creasty/defaults"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
+	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/rest"
+	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 )
 
 // CategoryList 算子分类列表

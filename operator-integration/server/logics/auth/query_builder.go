@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 )
 
 // QueryBuilder 查询构建器 - 提供更简洁的API来使用SelectListWithAuthBatch

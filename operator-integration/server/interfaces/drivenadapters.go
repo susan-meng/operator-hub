@@ -585,3 +585,63 @@ type SandBoxEnv interface {
 	// 执行代码
 	ExecuteCode(ctx context.Context, req *ExecuteCodeReq) (*ExecuteCodeResp, error)
 }
+
+// ChatCompletionReq 聊天完成请求
+type ChatCompletionReq struct {
+	Model            string                  `json:"model"`             // 模型名称，当传空字符串（""）并且不传model_id的时候代表调用默认模型（如果admin没有配置全局默认模型，调用会报错）
+	Messages         []ChatCompletionMessage `json:"messages"`          // 消息列表
+	Stream           bool                    `json:"stream"`            // 是否流式返回，默认false
+	TopK             int                     `json:"top_k"`             // 采样池大小，仅从概率最高的前 k 个 token 中选择，k 为整数。限制生成时的候选范围。k=1 时等价于贪心搜索（完全确定）；k=50 时允许更多样性，但可能降低相关性。取值范围1~∞
+	TopP             float64                 `json:"top_p"`             // 核采样，取值范围0~1，平衡生成结果的多样性和质量。值越小，输出越集中（如 0.9 仅保留概率最高的部分）；值越大，输出越随机。
+	FrequencyPenalty float64                 `json:"frequency_penalty"` // 频率惩罚，降低重复出现 token 的概率，范围通常为 -2.0~2.0。抑制重复内容。正值（如 0.5）惩罚重复词；负值鼓励重复（较少使用）
+	PresencePenalty  float64                 `json:"presence_penalty"`  // 存在惩罚，降低已出现过的 token 的概率，范围通常为 -2.0~2.0。鼓励生成新话题或词汇。例如设为 0.2 时，模型会避免重复使用已生成的词语。
+	Temperature      float64                 `json:"temperature"`       // 控制随机性（高=创意，低=严谨），0.1 生成保守结果，1.0 更灵活0~1，部分saas模型不支持0值
+	MaxTokens        int                     `json:"max_tokens"`        // 最大生成长度,，取值范围不可以超出模型最大上下文长度
+	ModelID          string                  `json:"model_id"`          // 模型ID，当传空字符串（""）并且不传model的时候代表调用默认模型（如果admin没有配置全局默认模型，调用会报错）
+}
+
+// ChatCompletionResp 聊天完成响应
+type ChatCompletionResp struct {
+	ID      string                 `json:"id"`      // 响应ID
+	Object  string                 `json:"object"`  // 对象类型，固定值"chat.completion"
+	Created int64                  `json:"created"` // 创建时间戳
+	Model   string                 `json:"model"`   // 模型名称
+	Choices []ChatCompletionChoice `json:"choices"` // 生成结果列表
+	Usage   ChatCompletionUsage    `json:"usage"`   // 消耗统计
+}
+
+type ChatCompletionChoice struct {
+	Index        int                   `json:"index"`             // 结果索引
+	Message      ChatCompletionMessage `json:"message,omitempty"` // 消息内容, 流式返回时为空
+	Delta        ChatCompletionMessage `json:"delta,omitempty"`   // 增量消息内容, 非流式返回时为空
+	FinishReason string                `json:"finish_reason"`     // 完成原因
+	Flag         int                   `json:"flag"`              // 标志位
+}
+
+// ChatCompletionMessage 消息结构体
+type ChatCompletionMessage struct {
+	Role    string `json:"role"`    // 角色
+	Content string `json:"content"` // 内容
+}
+
+// ChatCompletionUsage 消耗统计结构体
+type ChatCompletionUsage struct {
+	PromptTokens        int                       `json:"prompt_tokens"`         // 提示词 token 数
+	CompletionTokens    int                       `json:"completion_tokens"`     // 完成 token 数
+	TotalTokens         int                       `json:"total_tokens"`          // 总 token 数
+	PromptTokensDetails ChatCompletionTokenDetail `json:"prompt_tokens_details"` // 提示词 token 数详情
+}
+
+// ChatCompletionTokenDetail 提示词 token 数详情结构体
+type ChatCompletionTokenDetail struct {
+	CachedTokens   int `json:"cached_tokens"`   // 缓存 token 数
+	UncachedTokens int `json:"uncached_tokens"` // 未缓存 token 数
+}
+
+// MFModelAPIClient 模型管理API接口
+type MFModelAPIClient interface {
+	// 调用模型
+	ChatCompletion(ctx context.Context, req *ChatCompletionReq) (resp *ChatCompletionResp, err error)
+	// 调用模型流式返回
+	StreamChatCompletion(ctx context.Context, req *ChatCompletionReq) (chan string, chan error, error)
+}

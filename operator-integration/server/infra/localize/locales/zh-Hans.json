@@ -170,7 +170,8 @@
         "BusinessDomainIDRequired": "请求头中缺少业务域ID，请确保在请求中包含 x-business-domain 头部参数",
         "BusinessDomainForbidden": "您没有权限访问该业务域，请联系管理员获取权限",
         "SandboxRuntimeExecuteCodeFailed": "沙箱函数运行报错，请检查代码是否正确",
-        "DebugParamsInvalid": "调试传参错误，必须为JSON格式"
+        "DebugParamsInvalid": "调试传参错误，必须为JSON格式",
+        "FunctionAIGenerateFailed": "AI生成失败，请检查默认模型是否正常"
     },
     "sol": {
         "Common": "请联系管理员",

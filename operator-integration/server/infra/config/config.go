@@ -13,13 +13,13 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/creasty/defaults"
+	"github.com/go-playground/validator/v10"
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/logger"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/telemetry"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
-	"github.com/creasty/defaults"
-	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 )
@@ -48,6 +48,19 @@ type Config struct {
 	FlowAutomation           PrivateBaseConfig   `yaml:"flow-automation"`
 	BusinessDomainManagement PrivateBaseConfig   `yaml:"business-system-service"`
 	SandboxRuntime           PrivateBaseConfig   `yaml:"sandbox-runtime"`
+	MFModelAPI               PrivateBaseConfig   `yaml:"mf-model-api"`
+	LLMConfig                LLMConfig           `yaml:"llm"`
+}
+
+// LLMConfig LLM配置
+type LLMConfig struct {
+	Model            string  `yaml:"model"`
+	MaxTokens        int     `yaml:"max_tokens" default:"1024"`
+	Temperature      float64 `yaml:"temperature" default:"0.1"`
+	TopK             int     `yaml:"top_k" default:"20"`
+	TopP             float64 `yaml:"top_p" default:"0.1"`
+	FrequencyPenalty float64 `yaml:"frequency_penalty" default:"0.1"`
+	PresencePenalty  float64 `yaml:"presence_penalty" default:"0.1"`
 }
 
 // ObservabilityConfig 跟踪配置

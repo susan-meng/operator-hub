@@ -7,16 +7,16 @@ import (
 	"sync"
 	"time"
 
+	"github.com/creasty/defaults"
+	validator "github.com/go-playground/validator/v10"
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/dbaccess"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/config"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/lock"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/mq"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces/model"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
-	"github.com/creasty/defaults"
-	"github.com/go-playground/validator/v10"
-	"github.com/redis/go-redis/v9"
+	redis "github.com/redis/go-redis/v9"
 )
 
 const (

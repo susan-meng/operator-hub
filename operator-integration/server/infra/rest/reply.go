@@ -7,14 +7,14 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/bytedance/sonic"
+	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common"
 	myErr "github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/logger"
 	validatorv "github.com/kweaver-ai/operator-hub/operator-integration/server/infra/validator"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
-	"github.com/bytedance/sonic"
-	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 	errorwrap "github.com/pkg/errors"
 )
 

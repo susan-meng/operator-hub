@@ -340,6 +340,22 @@ func (mr *MockHTTPClientMockRecorder) PostNoUnmarshal(ctx, arg1, headers, reqPar
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PostNoUnmarshal", reflect.TypeOf((*MockHTTPClient)(nil).PostNoUnmarshal), ctx, arg1, headers, reqParam)
 }
 
+// PostStream mocks base method.
+func (m *MockHTTPClient) PostStream(ctx context.Context, arg1 string, headers map[string]string, reqParam any) (chan string, chan error, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PostStream", ctx, arg1, headers, reqParam)
+	ret0, _ := ret[0].(chan string)
+	ret1, _ := ret[1].(chan error)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// PostStream indicates an expected call of PostStream.
+func (mr *MockHTTPClientMockRecorder) PostStream(ctx, arg1, headers, reqParam any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PostStream", reflect.TypeOf((*MockHTTPClient)(nil).PostStream), ctx, arg1, headers, reqParam)
+}
+
 // Put mocks base method.
 func (m *MockHTTPClient) Put(ctx context.Context, arg1 string, headers map[string]string, reqParam any) (int, any, error) {
 	m.ctrl.T.Helper()

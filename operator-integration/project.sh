@@ -8,7 +8,7 @@ do
         go generate ./...;;
     "l")
         echo "==== golangci-lint run ===="
-        golangci-lint run ./... --exclude-dirs=server/tests;;
+        golangci-lint run --exclude-dirs=server/tests --timeout=10m ./... ;;
     "t")
         echo "====go test -v ./...====";
         go test $(go list ./... | grep -v /server/tests | grep -v /server/mocks) -gcflags=all=-l -v ;;

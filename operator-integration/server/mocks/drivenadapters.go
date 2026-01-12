@@ -595,3 +595,58 @@ func (mr *MockSandBoxEnvMockRecorder) GetSandBoxServerRouter() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSandBoxServerRouter", reflect.TypeOf((*MockSandBoxEnv)(nil).GetSandBoxServerRouter))
 }
+
+// MockMFModelAPIClient is a mock of MFModelAPIClient interface.
+type MockMFModelAPIClient struct {
+	ctrl     *gomock.Controller
+	recorder *MockMFModelAPIClientMockRecorder
+	isgomock struct{}
+}
+
+// MockMFModelAPIClientMockRecorder is the mock recorder for MockMFModelAPIClient.
+type MockMFModelAPIClientMockRecorder struct {
+	mock *MockMFModelAPIClient
+}
+
+// NewMockMFModelAPIClient creates a new mock instance.
+func NewMockMFModelAPIClient(ctrl *gomock.Controller) *MockMFModelAPIClient {
+	mock := &MockMFModelAPIClient{ctrl: ctrl}
+	mock.recorder = &MockMFModelAPIClientMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockMFModelAPIClient) EXPECT() *MockMFModelAPIClientMockRecorder {
+	return m.recorder
+}
+
+// ChatCompletion mocks base method.
+func (m *MockMFModelAPIClient) ChatCompletion(ctx context.Context, req *interfaces.ChatCompletionReq) (*interfaces.ChatCompletionResp, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ChatCompletion", ctx, req)
+	ret0, _ := ret[0].(*interfaces.ChatCompletionResp)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ChatCompletion indicates an expected call of ChatCompletion.
+func (mr *MockMFModelAPIClientMockRecorder) ChatCompletion(ctx, req any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChatCompletion", reflect.TypeOf((*MockMFModelAPIClient)(nil).ChatCompletion), ctx, req)
+}
+
+// StreamChatCompletion mocks base method.
+func (m *MockMFModelAPIClient) StreamChatCompletion(ctx context.Context, req *interfaces.ChatCompletionReq) (chan string, chan error, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "StreamChatCompletion", ctx, req)
+	ret0, _ := ret[0].(chan string)
+	ret1, _ := ret[1].(chan error)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// StreamChatCompletion indicates an expected call of StreamChatCompletion.
+func (mr *MockMFModelAPIClientMockRecorder) StreamChatCompletion(ctx, req any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StreamChatCompletion", reflect.TypeOf((*MockMFModelAPIClient)(nil).StreamChatCompletion), ctx, req)
+}

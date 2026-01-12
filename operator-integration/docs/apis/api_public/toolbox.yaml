@@ -1427,6 +1427,60 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /v1/ai_generate/function/:type:
+    post:
+      summary: "AI生成接口"
+      description: "AI辅助函数内容及参数生成接口"
+      tags:
+        - 函数
+      parameters:
+        - name: "Authorization"
+          in: "header"
+          required: true
+          description: "认证信息"
+          schema:
+            type: string
+            example: "Bearer token"
+        - name: "type"
+          in: "path"
+          required: true
+          description: "函数类型"
+          schema:
+            type: string
+            default: "python_function_generator"
+            example: "python_function_generator"
+            enum:
+              - "python_function_generator"
+              - "metadata_param_generator"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FunctionAIGenerateReq"
+      responses:
+        "200":
+          description: "函数块执行成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FunctionAIGenerateResp"
+            text/event-stream:
+              schema:
+                $ref: "#/components/schemas/SSEEvent"
+
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
   schemas:
     Error:
@@ -2472,3 +2526,138 @@ components:
           description: "子参数列表; 当 type 为 array, object时有效; 当type=array时，仅第一个参数有效"
           items:
             $ref: "#/components/schemas/FunctionParameterDef"
+    FunctionAIGenerateReq:
+      type: object
+      description: "函数 AI 生成请求"
+      properties:
+        query:
+          type: string
+          description: "用户提示词，当type=python_function_generator时必填"
+        code:
+          type: string
+          description: "代码内容，当type=metadata_param_generator时必填"
+        inputs:
+          type: array
+          description: "参数列表"
+          items:
+            $ref: "#/components/schemas/FunctionParameterDef"
+        outputs:
+          type: array
+          description: "输出参数列表"
+          items:
+            $ref: "#/components/schemas/FunctionParameterDef"
+        stream:
+          type: boolean
+          description: "是否流式输出"
+          default: false
+    FunctionAIGenerateResp:
+      type: object
+      description: "非流式模式结构化响应内容"
+      properties:
+        content:
+          type: object
+          description: "响应内容; 当type=python_function_generator时，content为函数代码string类型，当type=metadata_param_generator时，content为以下结构"
+          properties:
+            name:
+              type: string
+              description: "函数名"
+            description:
+              type: string
+              description: 函数描述
+            use_rule:
+              type: string
+              description: 使用规则
+            inputs:
+              type: array
+              description: 参数列表
+              items:
+                $ref: "#/components/schemas/FunctionParameterDef"
+            outputs:
+              type: array
+              description: 输出参数列表
+              items:
+                $ref: "#/components/schemas/FunctionParameterDef"
+    FunctionAIGenerateEvent:
+      type: object
+      description: "函数 AI 生成事件"
+      properties:
+        id:
+          type: string
+          description: "id"
+        model:
+          type: string
+          description: "模型"
+        object:
+          type: string
+          description: "对象"
+        choices:
+          type: array
+          description: "选择列表"
+          items:
+            type: object
+            description: "选择项"
+            properties:
+              index:
+                type: integer
+                description: "索引"
+              delta:
+                type: object
+                description: "增量：流式返回内容"
+                properties:
+                  content:
+                    type: string
+                    description: "内容"
+              message:
+                type: object
+                description: "消息；非流式返回内容"
+                properties:
+                  role:
+                    type: string
+                    description: "角色"
+                  content:
+                    type: string
+                    description: "内容"
+        usage:
+          type: object
+          description: "使用统计"
+          properties:
+            completion_tokens:
+              type: integer
+              description: "完成令牌数"
+            prompt_tokens:
+              type: integer
+              description: "提示令牌数"
+            total_tokens:
+              type: integer
+              description: "总令牌数"
+            prompt_tokens_details:
+              type: object
+              description: "提示令牌详情"
+              properties:
+                cached_tokens:
+                  type: integer
+                  description: "缓存令牌数"
+                uncached_tokens:
+                  type: integer
+                  description: "未缓存令牌数"
+            completion_tokens_details:
+              type: object
+              description: "完成令牌详情"
+              properties:
+                reasoning_tokens:
+                  type: integer
+                  description: "推理令牌数"
+    SSEEvent:
+      type: object
+      description: "SSE 事件"
+      properties:
+        event:
+          type: string
+          description: 事件类型
+          example: data
+          enum:
+            - data
+        data:
+          type: object
+          description: 事件内容
+          $ref: "#/components/schemas/FunctionAIGenerateEvent"

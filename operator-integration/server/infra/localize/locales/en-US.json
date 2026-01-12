@@ -170,7 +170,8 @@
         "BusinessDomainIDRequired": "Business domain ID is required, please check if there is any missing parameter",
         "BusinessDomainForbidden": "You do not have permission to access the business domain, please contact the administrator to get permission",
         "SandboxRuntimeExecuteCodeFailed": "Sandbox runtime execute code failed, please check if the code is correct",
-        "DebugParamsInvalid": "Debug parameters are invalid, please check if they are in JSON format"
+        "DebugParamsInvalid": "Debug parameters are invalid, please check if they are in JSON format",
+        "FunctionAIGenerateFailed": "AI generate failed, please check if the default model is normal"
     },
     "sol": {
         "Common": "Contact administrator",

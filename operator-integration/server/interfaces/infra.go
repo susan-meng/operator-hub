@@ -91,6 +91,7 @@ type HTTPClient interface {
 	PutNoUnmarshal(ctx context.Context, url string, headers map[string]string, reqParam interface{}) (respCode int, respBody []byte, err error)
 	Patch(ctx context.Context, url string, headers map[string]string, reqParam interface{}) (respCode int, respData interface{}, err error)
 	PatchNoUnmarshal(ctx context.Context, url string, headers map[string]string, reqParam interface{}) (respCode int, respBody []byte, err error)
+	PostStream(ctx context.Context, url string, headers map[string]string, reqParam interface{}) (chan string, chan error, error)
 }
 
 // Cache 缓存接口
