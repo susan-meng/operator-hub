@@ -4,11 +4,11 @@
 package driveradapters
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/drivenadapters"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/driveradapters/common"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/config"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
-	"github.com/gin-gonic/gin"
 )
 
 type restPublicHandler struct {
@@ -19,6 +19,7 @@ type restPublicHandler struct {
 	ImpexHandler        common.ImpexHandler
 	UnifiedProxyHandler common.UnifiedProxyHandler
 	TemplateHandler     common.TemplateHandler
+	AIGenerationHandler common.AIGenerationHandler
 	Logger              interfaces.Logger
 }
 
@@ -32,6 +33,7 @@ func NewRestPublicHandler() interfaces.HTTPRouterInterface {
 		ImpexHandler:        common.NewImpexHandler(),
 		UnifiedProxyHandler: common.NewUnifiedProxyHandler(),
 		TemplateHandler:     common.NewTemplateHandler(),
+		AIGenerationHandler: common.NewAIGenerationHandler(),
 		Logger:              config.NewConfigLoader().GetLogger(),
 	}
 }
@@ -54,4 +56,6 @@ func (r *restPublicHandler) RegisterRouter(engine *gin.RouterGroup) {
 	engine.POST("/function/execute", middlewareBusinessDomain(true, false), r.UnifiedProxyHandler.FunctionExecute)
 	// 获取Python模板
 	engine.GET("/template/:template_type", middlewareBusinessDomain(true, false), r.TemplateHandler.GetTemplate)
+	// AI辅助生成
+	engine.POST("/ai_generate/function/:type", middlewareBusinessDomain(true, false), r.AIGenerationHandler.FunctionAIGeneration)
 }

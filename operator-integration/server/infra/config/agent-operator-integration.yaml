@@ -43,6 +43,18 @@ agent-operator-app:
   private_host: "agent-operator-app.anyshare"
   private_port: 9000
   private_protocol: "http"
+mf-model-api:
+  private_host: "mf-model-api.anyshare"
+  private_port: 9898
+  private_protocol: "http"
+llm:
+  model: ""
+  max_tokens: 1024
+  temperature: 0.1
+  top_k: 20
+  top_p: 0.1
+  frequency_penalty: 0.1
+  presence_penalty: 0.1
 db:
   conn_timeout: 30
   read_timeout: 30

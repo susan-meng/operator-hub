@@ -189,6 +189,7 @@ const (
 	// 沙箱函数运行报错
 	ErrExtSandboxRuntimeExecuteCodeFailed ErrorCode = "SandboxRuntimeExecuteCodeFailed" // 沙箱函数运行报错，请检查代码是否正确
 	ErrExtDebugParamsInvalid              ErrorCode = "DebugParamsInvalid"              // 调试传参错误，必须为JSON格式
+	ErrExtFunctionAIGenerateFailed        ErrorCode = "FunctionAIGenerateFailed"        // AI生成失败，请检查默认模型是否正常
 )
 
 const (

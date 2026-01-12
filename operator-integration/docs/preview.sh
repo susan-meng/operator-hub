@@ -37,14 +37,9 @@ class HTMLOnlyHandler(http.server.SimpleHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "text/html; charset=utf-8")
         self.end_headers()
-
         # 自定义HTML输出
         self.wfile.write(b'<!DOCTYPE html>\n')
-        self.wfile.write(b'<html>\n<head>\n')
         self.wfile.write(b'<meta charset="utf-8">\n')
-        self.wfile.write(b'<title>Directory listing for %s</title>\n' % displaypath.encode('utf-8'))
-        self.wfile.write(b'<style>\n')
-        self.wfile.write(b'body { font-family: Arial, sans-serif; margin: 20px; }\n')
         self.wfile.write(b'h1 { color: #333; }\n')
         self.wfile.write(b'table { border-collapse: collapse; width: 100%; }\n')
         self.wfile.write(b'td, th { border: 1px solid #ddd; padding: 8px; text-align: left; }\n')
@@ -56,14 +51,12 @@ class HTMLOnlyHandler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(b'<h1>Directory listing for %s</h1>\n' % displaypath.encode('utf-8'))
         self.wfile.write(b'<hr>\n')
         self.wfile.write(b'<table>\n')
-
         # 添加返回上级目录链接
         if displaypath != '/':
             parent_path = os.path.dirname(displaypath.rstrip('/'))
             if parent_path == '':
                 parent_path = '/'
             self.wfile.write(b'<tr><td><a href="%s">Parent Directory</a></td></tr>\n' % parent_path.encode('utf-8'))
-
         # 只显示HTML文件和目录
         for name in list:
             fullname = os.path.join(path, name)

@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	icommon "github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common/ormhelper"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
@@ -20,8 +22,6 @@ import (
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/common"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metric"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
-	"github.com/google/uuid"
 )
 
 // 排序字段与数据库字段映射
@@ -1190,9 +1190,12 @@ func (s *mcpServiceImpl) generateMCPToolConfig(ctx context.Context, tool *model.
 	}
 
 	if tool.Description != "" {
-		toolConfig.Description = tool.Description + "\n use rule:" + tool.UseRule
+		toolConfig.Description = tool.Description
 	} else {
-		toolConfig.Description = toolInfo.Description + "\n use rule:" + tool.UseRule
+		toolConfig.Description = toolInfo.Description
+	}
+	if tool.UseRule != "" {
+		toolConfig.Description += "\n use rule:" + tool.UseRule
 	}
 
 	// 将元数据信息转换为json schema

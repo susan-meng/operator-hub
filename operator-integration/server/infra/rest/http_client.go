@@ -1,19 +1,22 @@
 package rest
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
+	"github.com/bytedance/sonic"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/logger"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/telemetry"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
-	"github.com/bytedance/sonic"
 )
 
 // httpClient HTTP客户端结构
@@ -253,4 +256,95 @@ func (c *httpClient) generateReq(ctx context.Context, httpMethod, url string,
 		}
 	}
 	return
+}
+
+// PostStream 发送POST请求，返回流式响应
+func (c *httpClient) PostStream(ctx context.Context, url string, headers map[string]string, reqParam interface{}) (chan string, chan error, error) {
+	messages := make(chan string)
+	errs := make(chan error)
+	go func() {
+		defer close(messages)
+		defer close(errs)
+
+		var read *bytes.Reader
+		if v, ok := reqParam.([]byte); ok {
+			read = bytes.NewReader(v)
+		} else {
+			var reqData []byte
+			reqData, err := sonic.Marshal(reqParam)
+			if err != nil {
+				errs <- err
+				return
+			}
+			read = bytes.NewReader(reqData)
+		}
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, read)
+		if err != nil {
+			errs <- err
+			return
+		}
+
+		for k, v := range headers {
+			req.Header.Add(k, v)
+		}
+		// 设置流式请求头
+		req.Header.Set("Accept", "text/event-stream")
+		req.Header.Set("Cache-Control", "no-cache")
+		req.Header.Set("Connection", "keep-alive")
+
+		resp, err := c.client.Do(req)
+		if err != nil {
+			errs <- err
+			return
+		}
+		defer func() {
+			if resp != nil && resp.Body != nil {
+				if closeErr := resp.Body.Close(); closeErr != nil {
+					errs <- closeErr
+				}
+			}
+		}()
+
+		if resp.StatusCode != http.StatusOK {
+			// 读取响应体
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				errs <- err
+				return
+			}
+			errs <- fmt.Errorf("POST request failed with status %d: %s", resp.StatusCode, string(body))
+			return
+		}
+		// 处理流式响应
+		reader := bufio.NewReader(resp.Body)
+
+		var currentEvent strings.Builder
+
+		for {
+			line, isPrefix, err := reader.ReadLine()
+			if err != nil {
+				if err == io.EOF || errors.Is(err, io.ErrUnexpectedEOF) {
+					return
+				}
+				errs <- err
+				return
+			}
+
+			// 处理长行（isPrefix为true）
+			if isPrefix {
+				// 对于长行，继续读取直到完整行
+				currentEvent.Write(line)
+				continue
+			}
+
+			// 完整的行，直接转发
+			lineStr := string(line)
+			if lineStr != "" {
+				currentEvent.WriteString(lineStr)
+				messages <- currentEvent.String()
+				currentEvent.Reset()
+			}
+		}
+	}()
+	return messages, errs, nil
 }

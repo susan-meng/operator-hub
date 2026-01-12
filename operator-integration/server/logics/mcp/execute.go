@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"net/http"
 
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/drivenadapters"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common"
 	infraerrors "github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/telemetry"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metric"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	"github.com/mark3labs/mcp-go/mcp"
 )
 

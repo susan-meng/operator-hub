@@ -4,10 +4,10 @@ package category
 import (
 	"sync"
 
+	"github.com/gin-gonic/gin"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/config"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	lcategory "github.com/kweaver-ai/operator-hub/operator-integration/server/logics/category"
-	"github.com/gin-gonic/gin"
 )
 
 type CategoryHandler interface {
