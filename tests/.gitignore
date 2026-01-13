@@ -1,0 +1,23 @@
+/.idea
+/**/__pycache__
+/**/*.pyc
+/**/*.pyo
+/.pytest_cache
+/.vscode
+# Test reports and Allure artifacts
+/report
+/report/**
+/report_*/
+/report_html
+/report_html/**
+/allure-results
+/allure-results/**
+/allure-report
+/allure-report/**
+# Generated test summary files
+test_summary.md
+/test_summary.md
+/gen-py-tmp
+/cm.yaml
+/**/export
+/**/temp
