@@ -14,12 +14,12 @@ import (
 	"sync"
 	"unicode/utf8"
 
+	"github.com/asaskevich/govalidator"
+	validatorv10 "github.com/go-playground/validator/v10"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/config"
 	myErr "github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
-	"github.com/asaskevich/govalidator"
-	validatorv10 "github.com/go-playground/validator/v10"
 )
 
 const (

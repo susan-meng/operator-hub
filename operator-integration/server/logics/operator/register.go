@@ -7,14 +7,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/google/uuid"
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces/model"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metric"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
-	"github.com/google/uuid"
 )
 
 // RegisterOperatorByOpenAPI 算子注册
@@ -120,6 +120,8 @@ func (m *operatorManager) UpdateOperatorByOpenAPI(ctx context.Context, req *inte
 		m.Logger.WithContext(ctx).Warnf("[UpdateOperatorByOpenAPI] pre check edit failed, err: %v", err)
 		return
 	}
+	metadataDB.SetMethod(metadataDBs[0].GetMethod())
+	metadataDB.SetPath(metadataDBs[0].GetPath())
 	editRes, err := m.editOperator(ctx, updateReq, operator, metadataDB, needUpdateMetadata, req.DirectPublish, isDataSource)
 	if err != nil {
 		m.Logger.WithContext(ctx).Warnf("edit operator failed, err: %v", err)
