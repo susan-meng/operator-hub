@@ -83,13 +83,25 @@ class Request():
                 # 如果响应不是有效的JSON，返回原始文本
                 return [resp.status_code, resp.text]
 
-    def post_multipart(self, url, files, data, headers):
-        '''封装post接口'''
+    def post_multipart(self, url, files, data, headers, params=None):
+        '''封装支持 Multipart 的 POST 接口'''
         allure.attach(url, name="Request URL")
-        allure.attach(str(data), name="Request Body")
-        # print(url)
-        resp = requests.post(url, files=files, data=data, headers=headers, verify=False, allow_redirects=False)
+        
+        # 深度拷贝并清理 headers，防止 Content-Type 冲突
+        request_headers = headers.copy()
+        if "Content-Type" in request_headers:
+            del request_headers["Content-Type"]
+            
+        if data:
+            allure.attach(str(data), name="Form Fields")
+        if params:
+            allure.attach(str(params), name="Query Params")
+            
+        resp = requests.post(url, files=files, data=data, headers=request_headers, params=params, verify=False, allow_redirects=False)
         # print(resp.status_code, resp.text)
+        
+        if resp.status_code == 500:
+            print(f"DEBUG: 500 Error Response Body: {resp.text}")
 
         allure.attach(str(resp.status_code), name="Response Code")
         allure.attach(resp.text, name="Response Result")

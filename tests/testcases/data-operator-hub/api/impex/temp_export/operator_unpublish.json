@@ -1,0 +1,263 @@
+{
+    "operator": {
+        "configs": [
+            {
+                "operator_id": "19ade54e-e858-4b01-9461-9d70bdae99c4",
+                "operator_name": "调用指定MCP服务下的工具",
+                "version": "4f60ad11-9414-4ad4-a847-da395c8daa1f",
+                "status": "unpublish",
+                "metadata_type": "openapi",
+                "metadata": {
+                    "version": "4f60ad11-9414-4ad4-a847-da395c8daa1f",
+                    "summary": "调用指定MCP服务下的工具",
+                    "description": "test",
+                    "server_url": "http://localhost:8080",
+                    "path": "/api/agent-operator-integration/internal-v1/mcp/proxy/{mcp_id}/tool/call",
+                    "method": "POST",
+                    "create_time": 1768301079077416373,
+                    "update_time": 1768301079077416373,
+                    "create_user": "90da0ae0-f04e-11f0-9711-3a5403cab1ac",
+                    "update_user": "90da0ae0-f04e-11f0-9711-3a5403cab1ac",
+                    "api_spec": {
+                        "parameters": [
+                            {
+                                "name": "user_id",
+                                "in": "header",
+                                "description": "用户ID",
+                                "required": true,
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            {
+                                "name": "mcp_id",
+                                "in": "path",
+                                "description": "MCP Server ID",
+                                "required": true,
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        ],
+                        "request_body": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "$ref": "#/components/schemas/McpProxyCallToolRequest"
+                                    }
+                                }
+                            },
+                            "required": false
+                        },
+                        "responses": [
+                            {
+                                "status_code": "200",
+                                "description": "成功返回工具调用结果（CallToolResult结构）",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "$ref": "#/components/schemas/McpProxyCallToolResponse"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "status_code": "400",
+                                "description": "工具调用参数错误",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "$ref": "#/components/schemas/ErrorResponse"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "status_code": "500",
+                                "description": "工具执行或服务器内部错误",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "$ref": "#/components/schemas/ErrorResponse"
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        "components": {
+                            "schemas": {
+                                "EmbeddedResource": {
+                                    "type": "object",
+                                    "properties": {
+                                        "resource": {
+                                            "type": "object"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "enum": [
+                                                "resource"
+                                            ]
+                                        }
+                                    }
+                                },
+                                "ErrorResponse": {
+                                    "type": "object",
+                                    "properties": {
+                                        "detail": {
+                                            "description": "错误详情",
+                                            "type": "object"
+                                        },
+                                        "link": {
+                                            "type": "string",
+                                            "description": "错误链接"
+                                        },
+                                        "solution": {
+                                            "description": "解决方案",
+                                            "type": "string"
+                                        },
+                                        "code": {
+                                            "type": "string",
+                                            "description": "错误码"
+                                        },
+                                        "description": {
+                                            "description": "错误描述",
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "McpProxyCallToolRequest": {
+                                    "properties": {
+                                        "tool_name": {
+                                            "type": "string",
+                                            "description": "工具名称"
+                                        },
+                                        "parameters": {
+                                            "type": "object",
+                                            "description": "工具请求参数"
+                                        }
+                                    },
+                                    "type": "object",
+                                    "required": [
+                                        "mcp_id",
+                                        "tool_name",
+                                        "parameters"
+                                    ]
+                                },
+                                "McpProxyCallToolResponse": {
+                                    "type": "object",
+                                    "properties": {
+                                        "content": {
+                                            "type": "array",
+                                            "description": "工具调用结果内容",
+                                            "items": {
+                                                "oneOf": [
+                                                    {
+                                                        "$ref": "#/components/schemas/TextContent"
+                                                    },
+                                                    {
+                                                        "$ref": "#/components/schemas/ImageContent"
+                                                    },
+                                                    {
+                                                        "$ref": "#/components/schemas/AudioContent"
+                                                    },
+                                                    {
+                                                        "$ref": "#/components/schemas/EmbeddedResource"
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "isError": {
+                                            "description": "是否为错误",
+                                            "type": "boolean"
+                                        }
+                                    }
+                                },
+                                "TextContent": {
+                                    "properties": {
+                                        "text": {
+                                            "type": "string"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "enum": [
+                                                "text"
+                                            ]
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "ImageContent": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        },
+                                        "mimeType": {
+                                            "type": "string"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "enum": [
+                                                "image"
+                                            ]
+                                        }
+                                    }
+                                },
+                                "AudioContent": {
+                                    "type": "object",
+                                    "properties": {
+                                        "type": {
+                                            "type": "string",
+                                            "enum": [
+                                                "audio"
+                                            ]
+                                        },
+                                        "data": {
+                                            "type": "string"
+                                        },
+                                        "mimeType": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "callbacks": null,
+                        "security": null,
+                        "tags": [
+                            "MCP服务执行"
+                        ],
+                        "external_docs": null
+                    }
+                },
+                "operator_info": {
+                    "operator_type": "basic",
+                    "execution_mode": "sync",
+                    "category": "other_category",
+                    "source": "unknown",
+                    "is_data_source": false
+                },
+                "operator_execute_control": {
+                    "timeout": 3000,
+                    "retry_policy": {
+                        "max_attempts": 3,
+                        "initial_delay": 1000,
+                        "backoff_factor": 2,
+                        "max_delay": 6000,
+                        "retry_conditions": {
+                            "status_code": null,
+                            "error_codes": null
+                        }
+                    }
+                },
+                "create_user": "90da0ae0-f04e-11f0-9711-3a5403cab1ac",
+                "create_time": 1768301079075482081,
+                "update_user": "90da0ae0-f04e-11f0-9711-3a5403cab1ac",
+                "update_time": 1768301079075482261,
+                "is_internal": false
+            }
+        ],
+        "composite_configs": null
+    }
+}

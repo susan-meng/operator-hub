@@ -424,7 +424,7 @@ docker run -it --name agent-at --net=host \
 ```
 nameserver 10.96.0.10
 search anyshare.svc.cluster.local svc.cluster.local cluster.local
-options ndots:5
+options ndots:2
 ```
 
 ### 2.4 运行测试

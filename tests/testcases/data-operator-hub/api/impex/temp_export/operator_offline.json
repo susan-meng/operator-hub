@@ -1,0 +1,211 @@
+{
+    "operator": {
+        "configs": [
+            {
+                "operator_id": "0713d812-67bd-4b69-a60d-b252b8fc9068",
+                "operator_name": "获取指定MCP服务下的工具列表",
+                "version": "7972eca0-9728-4fce-b6d4-df0e00f3c345",
+                "status": "offline",
+                "metadata_type": "openapi",
+                "metadata": {
+                    "version": "7972eca0-9728-4fce-b6d4-df0e00f3c345",
+                    "summary": "获取指定MCP服务下的工具列表",
+                    "description": "test",
+                    "server_url": "http://localhost:8080",
+                    "path": "/api/agent-operator-integration/internal-v1/mcp/proxy/{mcp_id}/tools",
+                    "method": "GET",
+                    "create_time": 1768301079110633564,
+                    "update_time": 1768301079110633564,
+                    "create_user": "90da0ae0-f04e-11f0-9711-3a5403cab1ac",
+                    "update_user": "90da0ae0-f04e-11f0-9711-3a5403cab1ac",
+                    "api_spec": {
+                        "parameters": [
+                            {
+                                "name": "user_id",
+                                "in": "header",
+                                "description": "用户ID",
+                                "required": true,
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            {
+                                "name": "mcp_id",
+                                "in": "path",
+                                "description": "MCP Server ID",
+                                "required": true,
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        ],
+                        "request_body": {
+                            "description": "",
+                            "content": {},
+                            "required": false
+                        },
+                        "responses": [
+                            {
+                                "status_code": "200",
+                                "description": "成功返回工具列表",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "$ref": "#/components/schemas/McpProxyToolListResponse"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "status_code": "404",
+                                "description": "未找到MCP服务",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "$ref": "#/components/schemas/ErrorResponse"
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        "components": {
+                            "schemas": {
+                                "McpProxyToolListResponse": {
+                                    "type": "object",
+                                    "properties": {
+                                        "tools": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Tool"
+                                            }
+                                        }
+                                    }
+                                },
+                                "Tool": {
+                                    "type": "object",
+                                    "properties": {
+                                        "inputSchema": {
+                                            "$ref": "#/components/schemas/ToolInputSchema"
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "description": "工具名称"
+                                        },
+                                        "annotations": {
+                                            "type": "object",
+                                            "description": "工具注解信息",
+                                            "properties": {
+                                                "title": {
+                                                    "type": "string",
+                                                    "description": "工具标题"
+                                                },
+                                                "destructiveHint": {
+                                                    "description": "是否有破坏性",
+                                                    "type": "boolean"
+                                                },
+                                                "idempotentHint": {
+                                                    "type": "boolean",
+                                                    "description": "是否幂等"
+                                                },
+                                                "openWorldHint": {
+                                                    "type": "boolean",
+                                                    "description": "是否与外部世界交互"
+                                                },
+                                                "readOnlyHint": {
+                                                    "description": "是否只读",
+                                                    "type": "boolean"
+                                                }
+                                            }
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "description": "工具描述"
+                                        }
+                                    }
+                                },
+                                "ToolInputSchema": {
+                                    "description": "工具参数输入Schema，采用JSON Schema规范，便于前端自动生成参数填写表单、校验参数等。",
+                                    "properties": {
+                                        "properties": {
+                                            "type": "object",
+                                            "description": "参数属性定义，key为参数名，value为参数schema（支持type、enum、description等JSON Schema字段）"
+                                        },
+                                        "required": {
+                                            "type": "array",
+                                            "description": "必填参数名列表",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "description": "参数类型，通常为object"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "ErrorResponse": {
+                                    "properties": {
+                                        "detail": {
+                                            "type": "object",
+                                            "description": "错误详情"
+                                        },
+                                        "link": {
+                                            "type": "string",
+                                            "description": "错误链接"
+                                        },
+                                        "solution": {
+                                            "type": "string",
+                                            "description": "解决方案"
+                                        },
+                                        "code": {
+                                            "description": "错误码",
+                                            "type": "string"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "description": "错误描述"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "callbacks": null,
+                        "security": null,
+                        "tags": [
+                            "MCP服务执行"
+                        ],
+                        "external_docs": null
+                    }
+                },
+                "operator_info": {
+                    "operator_type": "basic",
+                    "execution_mode": "sync",
+                    "category": "other_category",
+                    "source": "unknown",
+                    "is_data_source": false
+                },
+                "operator_execute_control": {
+                    "timeout": 3000,
+                    "retry_policy": {
+                        "max_attempts": 3,
+                        "initial_delay": 1000,
+                        "backoff_factor": 2,
+                        "max_delay": 6000,
+                        "retry_conditions": {
+                            "status_code": null,
+                            "error_codes": null
+                        }
+                    }
+                },
+                "create_user": "90da0ae0-f04e-11f0-9711-3a5403cab1ac",
+                "create_time": 1768301079109114514,
+                "update_user": "90da0ae0-f04e-11f0-9711-3a5403cab1ac",
+                "update_time": 1768301079396878577,
+                "is_internal": false
+            }
+        ],
+        "composite_configs": null
+    }
+}
