@@ -85,7 +85,7 @@ host = 192.168.232.11
 port = 443
 db_port = 3330
 db_user = anyshare
-db_pwd = eisoo.com123
+db_pwd = YOUR_DATABASE_PASSWORD_HERE
 
 [requests]
 protocol = https
