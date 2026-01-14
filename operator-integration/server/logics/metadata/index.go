@@ -9,6 +9,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/google/uuid"
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/dbaccess"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/config"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
@@ -17,8 +19,6 @@ import (
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces/model"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/parsers"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
-	"github.com/google/uuid"
 )
 
 // metadataService 统一元数据管理服务
