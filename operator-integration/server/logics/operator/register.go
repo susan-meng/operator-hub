@@ -120,6 +120,8 @@ func (m *operatorManager) UpdateOperatorByOpenAPI(ctx context.Context, req *inte
 		m.Logger.WithContext(ctx).Warnf("[UpdateOperatorByOpenAPI] pre check edit failed, err: %v", err)
 		return
 	}
+	metadataDB.SetMethod(metadataDBs[0].GetMethod())
+	metadataDB.SetPath(metadataDBs[0].GetPath())
 	editRes, err := m.editOperator(ctx, updateReq, operator, metadataDB, needUpdateMetadata, req.DirectPublish, isDataSource)
 	if err != nil {
 		m.Logger.WithContext(ctx).Warnf("edit operator failed, err: %v", err)
