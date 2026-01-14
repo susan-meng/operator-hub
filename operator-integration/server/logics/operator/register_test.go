@@ -8,13 +8,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/agiledragon/gomonkey/v2"
 	myErr "github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/logger"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces/model"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metric"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/mocks"
-	"github.com/agiledragon/gomonkey/v2"
 	. "github.com/smartystreets/goconvey/convey"
 	"go.uber.org/mock/gomock"
 )
@@ -28,7 +28,7 @@ func TestRegisterOperatorByOpenAPI(t *testing.T) {
 	mockCategoryManager := mocks.NewMockCategoryManager(ctrl)
 	mockUserMgnt := mocks.NewMockUserManagement(ctrl)
 	mockValidator := mocks.NewMockValidator(ctrl)
-	mockOpenAPIParser := mocks.NewMockIOpenAPIParser(ctrl)
+	// mockOpenAPIParser := mocks.NewMockIOpenAPIParser(ctrl)
 	mockProxy := mocks.NewMockProxyHandler(ctrl)
 	mockOpReleaseDB := mocks.NewMockIOperatorReleaseDB(ctrl)
 	mockOpReleaseHistoryDB := mocks.NewMockIOperatorReleaseHistoryDB(ctrl)
@@ -56,19 +56,19 @@ func TestRegisterOperatorByOpenAPI(t *testing.T) {
 			},
 		}
 		accessor := &interfaces.AuthAccessor{}
-		items := []*interfaces.PathItemContent{
-			{
-				Summary:    "test_summary1",
-				Path:       "/test_path1",
-				Method:     "POST",
-				ErrMessage: "test_err_message1",
-			},
-			{
-				Summary: "test_summary2",
-				Path:    "/test_path2",
-				Method:  "POST",
-			},
-		}
+		// items := []*interfaces.PathItemContent{
+		// 	{
+		// 		Summary:    "test_summary1",
+		// 		Path:       "/test_path1",
+		// 		Method:     "POST",
+		// 		ErrMessage: "test_err_message1",
+		// 	},
+		// 	{
+		// 		Summary: "test_summary2",
+		// 		Path:    "/test_path2",
+		// 		Method:  "POST",
+		// 	},
+		// }
 		Convey("获取accessor信息失败", func() {
 			mockAuthService.EXPECT().GetAccessor(gomock.Any(), gomock.Any()).Return(nil, mocks.MockFuncErr("GetAccessor")).Times(1)
 			_, err := operator.RegisterOperatorByOpenAPI(context.TODO(), req, "")
@@ -106,7 +106,7 @@ func TestRegisterOperatorByOpenAPI(t *testing.T) {
 			mockAuthService.EXPECT().GetAccessor(gomock.Any(), gomock.Any()).Return(accessor, nil).Times(1)
 			mockAuthService.EXPECT().CheckCreatePermission(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
 			mockCategoryManager.EXPECT().CheckCategory(gomock.Any()).Return(true).Times(1)
-			mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return(nil, mocks.MockFuncErr("GetPathItems")).Times(1)
+			// // mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return(nil, mocks.MockFuncErr("GetPathItems")).Times(1)
 			_, err := operator.RegisterOperatorByOpenAPI(context.TODO(), req, "")
 			So(err, ShouldNotBeNil)
 			httpErr := &myErr.HTTPError{}
@@ -118,7 +118,7 @@ func TestRegisterOperatorByOpenAPI(t *testing.T) {
 			mockAuthService.EXPECT().GetAccessor(gomock.Any(), gomock.Any()).Return(accessor, nil).Times(1)
 			mockAuthService.EXPECT().CheckCreatePermission(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
 			mockCategoryManager.EXPECT().CheckCategory(gomock.Any()).Return(true).Times(1)
-			mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return(items, nil).Times(1)
+			// mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return(items, nil).Times(1)
 			mockValidator.EXPECT().ValidateOperatorImportCount(gomock.Any(), gomock.Any()).Return(mocks.MockFuncErr("ValidateOperatorImportCount")).Times(1)
 			_, err := operator.RegisterOperatorByOpenAPI(context.TODO(), req, "")
 			So(err, ShouldNotBeNil)
@@ -129,7 +129,7 @@ func TestRegisterOperatorByOpenAPI(t *testing.T) {
 			mockAuthService.EXPECT().GetAccessor(gomock.Any(), gomock.Any()).Return(accessor, nil).Times(1)
 			mockAuthService.EXPECT().CheckCreatePermission(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
 			mockCategoryManager.EXPECT().CheckCategory(gomock.Any()).Return(true).Times(1)
-			mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return(items, nil).Times(1)
+			// mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return(items, nil).Times(1)
 			mockValidator.EXPECT().ValidateOperatorImportCount(gomock.Any(), gomock.Any()).Return(nil).Times(1)
 			_, err := operator.RegisterOperatorByOpenAPI(context.TODO(), req, "")
 			So(err, ShouldNotBeNil)
@@ -143,7 +143,7 @@ func TestRegisterOperatorByOpenAPI(t *testing.T) {
 			mockAuthService.EXPECT().GetAccessor(gomock.Any(), gomock.Any()).Return(accessor, nil).Times(1)
 			mockAuthService.EXPECT().CheckCreatePermission(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
 			mockCategoryManager.EXPECT().CheckCategory(gomock.Any()).Return(true).Times(1)
-			mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return(items, nil).Times(1)
+			// mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return(items, nil).Times(1)
 			mockValidator.EXPECT().ValidateOperatorImportCount(gomock.Any(), gomock.Any()).Return(nil).Times(1)
 			mockValidator.EXPECT().ValidateOperatorName(gomock.Any(), gomock.Any()).Return(mocks.MockFuncErr("ValidateOperatorName")).Times(1)
 			resp, err := operator.RegisterOperatorByOpenAPI(context.TODO(), req, "")
@@ -159,7 +159,7 @@ func TestRegisterOperatorByOpenAPI(t *testing.T) {
 			mockAuthService.EXPECT().GetAccessor(gomock.Any(), gomock.Any()).Return(accessor, nil).Times(1)
 			mockAuthService.EXPECT().CheckCreatePermission(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
 			mockCategoryManager.EXPECT().CheckCategory(gomock.Any()).Return(true).Times(1)
-			mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return(items, nil).Times(1)
+			// mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return(items, nil).Times(1)
 			mockValidator.EXPECT().ValidateOperatorImportCount(gomock.Any(), gomock.Any()).Return(nil).Times(1)
 			mockValidator.EXPECT().ValidateOperatorName(gomock.Any(), gomock.Any()).Return(nil).Times(1)
 			mockValidator.EXPECT().ValidateOperatorDesc(gomock.Any(), gomock.Any()).Return(mocks.MockFuncErr("ValidateOperatorDesc")).Times(1)
@@ -176,7 +176,7 @@ func TestRegisterOperatorByOpenAPI(t *testing.T) {
 			mockAuthService.EXPECT().GetAccessor(gomock.Any(), gomock.Any()).Return(accessor, nil).Times(1)
 			mockAuthService.EXPECT().CheckCreatePermission(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
 			mockCategoryManager.EXPECT().CheckCategory(gomock.Any()).Return(true).Times(1)
-			mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return(items, nil).Times(1)
+			// mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return(items, nil).Times(1)
 			mockValidator.EXPECT().ValidateOperatorImportCount(gomock.Any(), gomock.Any()).Return(nil).Times(1)
 			mockValidator.EXPECT().ValidateOperatorName(gomock.Any(), gomock.Any()).Return(nil).Times(1)
 			mockValidator.EXPECT().ValidateOperatorDesc(gomock.Any(), gomock.Any()).Return(nil).Times(1)
@@ -194,7 +194,7 @@ func TestRegisterOperatorByOpenAPI(t *testing.T) {
 			mockAuthService.EXPECT().GetAccessor(gomock.Any(), gomock.Any()).Return(accessor, nil).Times(1)
 			mockAuthService.EXPECT().CheckCreatePermission(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
 			mockCategoryManager.EXPECT().CheckCategory(gomock.Any()).Return(true).Times(1)
-			mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return(items, nil).Times(1)
+			// mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return(items, nil).Times(1)
 			mockValidator.EXPECT().ValidateOperatorImportCount(gomock.Any(), gomock.Any()).Return(nil).Times(1)
 			mockValidator.EXPECT().ValidateOperatorName(gomock.Any(), gomock.Any()).Return(nil).Times(1)
 			mockValidator.EXPECT().ValidateOperatorDesc(gomock.Any(), gomock.Any()).Return(nil).Times(1)
@@ -212,7 +212,7 @@ func TestRegisterOperatorByOpenAPI(t *testing.T) {
 			mockAuthService.EXPECT().GetAccessor(gomock.Any(), gomock.Any()).Return(accessor, nil)
 			mockAuthService.EXPECT().CheckCreatePermission(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 			mockCategoryManager.EXPECT().CheckCategory(gomock.Any()).Return(true)
-			mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return(items, nil)
+			// mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return(items, nil)
 			mockValidator.EXPECT().ValidateOperatorImportCount(gomock.Any(), gomock.Any()).Return(nil)
 			mockValidator.EXPECT().ValidateOperatorName(gomock.Any(), gomock.Any()).Return(nil)
 			mockValidator.EXPECT().ValidateOperatorDesc(gomock.Any(), gomock.Any()).Return(nil)
@@ -273,18 +273,18 @@ func TestRegisterOperatorByOpenAPI(t *testing.T) {
 		Convey("直接发布", func() {
 			req.DirectPublish = true
 			req.MetadataType = interfaces.MetadataTypeAPI
-			items := []*interfaces.PathItemContent{
-				{
-					Path:        "/v1/operator",
-					Method:      "POST",
-					Summary:     "创建算子",
-					Description: "创建算子",
-				},
-			}
+			// items := []*interfaces.PathItemContent{
+			// 	{
+			// 		Path:        "/v1/operator",
+			// 		Method:      "POST",
+			// 		Summary:     "创建算子",
+			// 		Description: "创建算子",
+			// 	},
+			// }
 			mockAuthService.EXPECT().GetAccessor(gomock.Any(), gomock.Any()).Return(accessor, nil)
 			mockAuthService.EXPECT().CheckCreatePermission(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 			mockCategoryManager.EXPECT().CheckCategory(gomock.Any()).Return(true)
-			mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return(items, nil)
+			// mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return(items, nil)
 			mockValidator.EXPECT().ValidateOperatorImportCount(gomock.Any(), gomock.Any()).Return(nil)
 			mockValidator.EXPECT().ValidateOperatorName(gomock.Any(), gomock.Any()).Return(nil)
 			mockValidator.EXPECT().ValidateOperatorDesc(gomock.Any(), gomock.Any()).Return(nil)
@@ -324,7 +324,6 @@ func TestUpdateOperatorByOpenAPI(t *testing.T) {
 	mockCategoryManager := mocks.NewMockCategoryManager(ctrl)
 	mockUserMgnt := mocks.NewMockUserManagement(ctrl)
 	mockValidator := mocks.NewMockValidator(ctrl)
-	mockOpenAPIParser := mocks.NewMockIOpenAPIParser(ctrl)
 	mockProxy := mocks.NewMockProxyHandler(ctrl)
 	mockOpReleaseDB := mocks.NewMockIOperatorReleaseDB(ctrl)
 	mockOpReleaseHistoryDB := mocks.NewMockIOperatorReleaseHistoryDB(ctrl)
@@ -363,7 +362,7 @@ func TestUpdateOperatorByOpenAPI(t *testing.T) {
 		Convey("导入数据为空", func() {
 			req.MetadataType = interfaces.MetadataTypeAPI
 			mockCategoryManager.EXPECT().CheckCategory(gomock.Any()).Return(true).Times(1)
-			mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return([]*interfaces.PathItemContent{}, nil)
+			// // mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return([]*interfaces.PathItemContent{}, nil)
 			mockValidator.EXPECT().ValidateOperatorImportCount(gomock.Any(), gomock.Any()).Return(nil)
 			_, err := operator.UpdateOperatorByOpenAPI(context.TODO(), req, "")
 			So(err, ShouldNotBeNil)
@@ -374,7 +373,7 @@ func TestUpdateOperatorByOpenAPI(t *testing.T) {
 		Convey("导入多条数据", func() {
 			req.MetadataType = interfaces.MetadataTypeAPI
 			mockCategoryManager.EXPECT().CheckCategory(gomock.Any()).Return(true).Times(1)
-			mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return([]*interfaces.PathItemContent{{}, {}}, nil)
+			// // mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return([]*interfaces.PathItemContent{{}, {}}, nil)
 			mockValidator.EXPECT().ValidateOperatorImportCount(gomock.Any(), gomock.Any()).Return(nil)
 			_, err := operator.UpdateOperatorByOpenAPI(context.TODO(), req, "")
 			So(err, ShouldNotBeNil)
@@ -386,12 +385,12 @@ func TestUpdateOperatorByOpenAPI(t *testing.T) {
 			req.DirectPublish = true
 			req.MetadataType = interfaces.MetadataTypeAPI
 			mockCategoryManager.EXPECT().CheckCategory(gomock.Any()).Return(true).Times(1)
-			mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return([]*interfaces.PathItemContent{{
-				Summary:     "测试算子",
-				Path:        "/test",
-				Method:      "POST",
-				Description: "测试算子",
-			}}, nil)
+			// // mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(), gomock.Any()).Return([]*interfaces.PathItemContent{{
+			// 	Summary:     "测试算子",
+			// 	Path:        "/test",
+			// 	Method:      "POST",
+			// 	Description: "测试算子",
+			// }}, nil)
 			mockValidator.EXPECT().ValidateOperatorImportCount(gomock.Any(), gomock.Any()).Return(nil)
 			operatorDB := &model.OperatorRegisterDB{}
 			accessor := &interfaces.AuthAccessor{}
@@ -454,7 +453,7 @@ func TestUpdateOperatorByOpenAPI(t *testing.T) {
 		// 	req.DirectPublish = true
 		// 	req.MetadataType = interfaces.MetadataTypeAPI
 		// 	mockCategoryManager.EXPECT().CheckCategory(gomock.Any()).Return(true).Times(1)
-		// 	mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(),gomock.Any()).Return([]*interfaces.PathItemContent{{
+		// 	// mockOpenAPIParser.EXPECT().GetPathItems(gomock.Any(),gomock.Any()).Return([]*interfaces.PathItemContent{{
 		// 		Summary:     "测试算子",
 		// 		Path:        "/test",
 		// 		Method:      "POST",

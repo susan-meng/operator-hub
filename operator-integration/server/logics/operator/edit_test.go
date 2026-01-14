@@ -9,13 +9,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/agiledragon/gomonkey/v2"
 	myErr "github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/logger"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces/model"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metric"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/mocks"
-	"github.com/agiledragon/gomonkey/v2"
 	. "github.com/smartystreets/goconvey/convey"
 	"go.uber.org/mock/gomock"
 )
@@ -31,7 +31,6 @@ func TestEditOperator(t *testing.T) {
 	mockCategoryManager := mocks.NewMockCategoryManager(ctrl)
 	mockUserMgnt := mocks.NewMockUserManagement(ctrl)
 	mockValidator := mocks.NewMockValidator(ctrl)
-	mockOpenAPIParser := mocks.NewMockIOpenAPIParser(ctrl)
 	mockProxy := mocks.NewMockProxyHandler(ctrl)
 	mockOpReleaseDB := mocks.NewMockIOperatorReleaseDB(ctrl)
 	mockOpReleaseHistoryDB := mocks.NewMockIOperatorReleaseHistoryDB(ctrl)
@@ -230,7 +229,7 @@ func TestEditOperator(t *testing.T) {
 					UpdateUser:   mockReq.UserID,
 					MetadataType: string(interfaces.MetadataTypeAPI),
 				}, nil)
-			mockOpenAPIParser.EXPECT().GetPathItemContent(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, mocks.MockFuncErr("GetPathItemContent")).Times(1)
+			// mockOpenAPIParser.EXPECT().GetPathItemContent(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, mocks.MockFuncErr("GetPathItemContent")).Times(1)
 			mockAuthService.EXPECT().GetAccessor(gomock.Any(), gomock.Any()).Return(&interfaces.AuthAccessor{}, nil).Times(1)
 			mockAuthService.EXPECT().CheckModifyPermission(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
 			mockValidator.EXPECT().ValidateOperatorName(gomock.Any(), gomock.Any()).Return(nil).Times(1)
@@ -249,9 +248,7 @@ func TestEditOperator(t *testing.T) {
 					UpdateUser:   mockReq.UserID,
 					MetadataType: string(interfaces.MetadataTypeAPI),
 				}, nil)
-			mockOpenAPIParser.EXPECT().GetPathItemContent(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&interfaces.PathItemContent{
-				Summary: mockName,
-			}, nil).Times(1)
+			// mockOpenAPIParss
 			mockAuthService.EXPECT().GetAccessor(gomock.Any(), gomock.Any()).Return(&interfaces.AuthAccessor{}, nil).Times(1)
 			mockAuthService.EXPECT().CheckModifyPermission(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
 			mockValidator.EXPECT().ValidateOperatorName(gomock.Any(), gomock.Any()).Return(nil).Times(2)
@@ -278,9 +275,9 @@ func TestEditOperator(t *testing.T) {
 		mockValidator.EXPECT().ValidatorStruct(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 		mockValidator.EXPECT().ValidateOperatorDesc(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 		mockDBTx.EXPECT().GetTx(gomock.Any()).Return(&sql.Tx{}, nil)
-		mockOpenAPIParser.EXPECT().GetPathItemContent(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&interfaces.PathItemContent{
-			Summary: mockName,
-		}, nil).AnyTimes()
+		// mockOpenAPIParser.EXPECT().GetPathItemContent(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&interfaces.PathItemContent{
+		// 	Summary: mockName,
+		// }, nil).AnyTimes()
 		Convey("检查算子重名: 查询重名算子失败（db）", func() {
 			mockDBOperatorManager.EXPECT().SelectByOperatorID(gomock.Any(), gomock.Any(), gomock.Any()).
 				Return(true, &model.OperatorRegisterDB{
@@ -346,9 +343,9 @@ func TestEditOperator(t *testing.T) {
 		mockValidator.EXPECT().ValidatorStruct(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 		mockValidator.EXPECT().ValidateOperatorDesc(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 		mockDBTx.EXPECT().GetTx(gomock.Any()).Return(&sql.Tx{}, nil).AnyTimes()
-		mockOpenAPIParser.EXPECT().GetPathItemContent(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&interfaces.PathItemContent{
-			Summary: mockName,
-		}, nil).AnyTimes()
+		// mockOpenAPIParser.EXPECT().GetPathItemContent(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&interfaces.PathItemContent{
+		// 	Summary: mockName,
+		// }, nil).AnyTimes()
 		Convey("新增元数据信息失败", func() {
 			mockDBOperatorManager.EXPECT().SelectByOperatorID(gomock.Any(), gomock.Any(), gomock.Any()).
 				Return(true, &model.OperatorRegisterDB{
@@ -401,9 +398,9 @@ func TestEditOperator(t *testing.T) {
 			return nil
 		})
 		defer p1.Reset()
-		mockOpenAPIParser.EXPECT().GetPathItemContent(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&interfaces.PathItemContent{
-			Summary: mockName,
-		}, nil).AnyTimes()
+		// mockOpenAPIParser.EXPECT().GetPathItemContent(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&interfaces.PathItemContent{
+		// 	Summary: mockName,
+		// }, nil).AnyTimes()
 		mockAuthService.EXPECT().GetAccessor(gomock.Any(), gomock.Any()).Return(&interfaces.AuthAccessor{}, nil).AnyTimes()
 		mockAuthService.EXPECT().CheckModifyPermission(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 		mockValidator.EXPECT().ValidateOperatorName(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
