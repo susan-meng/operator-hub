@@ -69,7 +69,7 @@ docker run -it --name agent-at --net=host \
 
 # Pipeline parameters include:
 - host: Server SSH IP (default: 192.168.232.15)
-- password: Server SSH password (default: eisoo.com123)
+- password: Server SSH password (default: YOUR_SSH_PASSWORD_HERE)
 - testdir: Test case directory to run (default: testcases/data-operator-hub/api - UPDATED)
 ```
 

@@ -118,7 +118,7 @@ parameters:
   - name: password
     displayName: 服务器SSH密码
     type: string
-    default: eisoo.com123
+    default: YOUR_SSH_PASSWORD_HERE
 
   - name: testdir
     displayName: 测试用例目录
@@ -148,7 +148,7 @@ parameters:
   - name: db_password
     displayName: 数据库密码
     type: string
-    default: eisoo.com123
+    default: YOUR_DATABASE_PASSWORD_HERE
 ```
 
 # 分支管理
