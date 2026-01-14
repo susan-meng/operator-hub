@@ -7,6 +7,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/creasty/defaults"
+	"github.com/google/uuid"
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	icommon "github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
@@ -14,9 +17,6 @@ import (
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metadata"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metric"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
-	"github.com/creasty/defaults"
-	"github.com/google/uuid"
 )
 
 // Import 导入
@@ -231,13 +231,13 @@ func (s *ToolServiceImpl) importByCreate(ctx context.Context, tx *sql.Tx, item *
 		return
 	}
 	// 处理元数据
-	metadataMap := map[string]interfaces.Metadata{}
+	metadataMap := map[string]interfaces.IMetadataDB{}
 	for _, metadataDB := range metadataDBs {
 		version := metadataDB.GetVersion()
 		metadataDB.SetVersion(uuid.New().String())
 		metadataMap[version] = metadataDB
 	}
-	newMetadataDBs := []interfaces.Metadata{}
+	newMetadataDBs := []interfaces.IMetadataDB{}
 	toolIDs := []string{}
 	for _, toolDB := range toolDBs {
 		if metadataDB, ok := metadataMap[toolDB.SourceID]; ok {
@@ -343,7 +343,7 @@ func (s *ToolServiceImpl) importByUpsert(ctx context.Context, tx *sql.Tx, toolBo
 
 // importCheck 校验导入的工具箱信息
 func (s *ToolServiceImpl) importCheck(ctx context.Context, item *interfaces.ToolBoxImpexItem, userID string) (toolDBs []*model.ToolDB,
-	metadataList []interfaces.Metadata, err error) {
+	metadataList []interfaces.IMetadataDB, err error) {
 	// 注入默认值并校验
 	err = defaults.Set(item)
 	if err != nil {

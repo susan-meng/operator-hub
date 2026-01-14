@@ -7,13 +7,13 @@ import (
 	"net/http"
 	"time"
 
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/telemetry"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces/model"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metric"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 )
 
 // UpdateToolBox 更新工具箱
@@ -86,7 +86,7 @@ func (s *ToolServiceImpl) UpdateToolBox(ctx context.Context, req *interfaces.Upd
 	// 更新元数据
 	switch req.MetadataType {
 	case interfaces.MetadataTypeAPI:
-		var metadatas []interfaces.Metadata
+		var metadatas []interfaces.IMetadataDB
 		if req.OpenAPIInput != nil && req.OpenAPIInput.Data != nil {
 			metadatas, err = s.MetadataService.ParseMetadata(ctx, req.MetadataType, req.OpenAPIInput.Data)
 		}
@@ -138,7 +138,7 @@ func (s *ToolServiceImpl) UpdateToolBox(ctx context.Context, req *interfaces.Upd
 }
 
 // 批量更新OpenAPI类型的工具元数据
-func (s *ToolServiceImpl) batchUpdateOpenAPIToolMetadata(ctx context.Context, tx *sql.Tx, boxID, userID string, updateMetadatas []interfaces.Metadata) (resp []*interfaces.EditToolInfo, err error) {
+func (s *ToolServiceImpl) batchUpdateOpenAPIToolMetadata(ctx context.Context, tx *sql.Tx, boxID, userID string, updateMetadatas []interfaces.IMetadataDB) (resp []*interfaces.EditToolInfo, err error) {
 	resp = []*interfaces.EditToolInfo{}
 	// 获取当前工具箱内全部工具
 	var tools []*model.ToolDB
@@ -166,7 +166,7 @@ func (s *ToolServiceImpl) batchUpdateOpenAPIToolMetadata(ctx context.Context, tx
 		return
 	}
 	// 构建更新元数据的映射表
-	updateMetadataMap := map[string]interfaces.Metadata{}
+	updateMetadataMap := map[string]interfaces.IMetadataDB{}
 	for _, metadata := range updateMetadatas {
 		updateMetadataMap[validatorMethodPath(metadata.GetMethod(), metadata.GetPath())] = metadata
 	}

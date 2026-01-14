@@ -7,14 +7,14 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/go-python/gpython/ast"
+	"github.com/go-python/gpython/parser"
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces/model"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
-	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/go-python/gpython/ast"
-	"github.com/go-python/gpython/parser"
 )
 
 // pythonFunctionParser Python 函数解析器
@@ -46,6 +46,15 @@ func (p *pythonFunctionParser) validate(ctx context.Context, inputValue any) (in
 	err = p.Validator.ValidatorStruct(ctx, input)
 	if err != nil {
 		return
+	}
+	if input.Inputs == nil {
+		input.Inputs = make([]*interfaces.ParameterDef, 0)
+	}
+	for _, param := range input.Inputs {
+		err = p.Validator.VisitorParameterDef(ctx, param)
+		if err != nil {
+			return
+		}
 	}
 	return
 }
@@ -88,7 +97,7 @@ func checkRegexpHandler(ctx context.Context, code string) (err error) {
 // }
 
 // Parse 解析 Python 函数
-func (p *pythonFunctionParser) Parse(ctx context.Context, inputValue any) (metadatas []interfaces.Metadata, err error) {
+func (p *pythonFunctionParser) Parse(ctx context.Context, inputValue any) (metadatas []interfaces.IMetadataDB, err error) {
 	// 记录可观测性
 	ctx, _ = o11y.StartInternalSpan(ctx)
 	defer o11y.EndSpan(ctx, err)
@@ -105,7 +114,7 @@ func (p *pythonFunctionParser) Parse(ctx context.Context, inputValue any) (metad
 	if desc == "" {
 		desc = pathItem.Summary
 	}
-	metadatas = make([]interfaces.Metadata, 0)
+	metadatas = make([]interfaces.IMetadataDB, 0)
 	metadataDB := &model.FunctionMetadataDB{
 		ScriptType:   string(input.ScriptType),
 		Code:         input.Code,
@@ -168,15 +177,6 @@ func convertToPathItemContent(input *interfaces.FunctionInput) (result *interfac
 	return
 }
 
-/*
-// 构造请求体
-type FunctionExecuteProxyReq struct {
-	Version string         `uri:"version" validate:"required,uuid4"`
-	Timeout int64          `query:"timeout"` // 毫秒
-	Event   map[string]any `json:"event"`
-}
-*/
-
 // 构造Parameter参数
 func createParameter() []*interfaces.Parameter {
 	parameters := make([]*interfaces.Parameter, 0)
@@ -196,36 +196,12 @@ func createParameter() []*interfaces.Parameter {
 }
 
 // 构造请求体结构
-func createRequestBody(inputs []interfaces.ParameterDef) *interfaces.RequestBody {
+func createRequestBody(inputs []*interfaces.ParameterDef) *interfaces.RequestBody {
 	// 创建schema定义
 	requestBodySchema := openapi3.NewObjectSchema()
 	if len(inputs) > 0 {
 		for _, input := range inputs {
-			if input.Description == "" {
-				input.Description = input.Name
-			}
-			propertySchema := &openapi3.Schema{
-				Type:        mapTypeToOpenAPI(input.Type),
-				Description: input.Description,
-			}
-			// 设置默认值
-			if input.Default != nil {
-				propertySchema.Default = input.Default
-			}
-			// 设置枚举值
-			if len(input.Enum) > 0 {
-				propertySchema.Enum = input.Enum
-			}
-			// 设置示例值
-			if input.Example != nil {
-				propertySchema.Example = input.Example
-			}
-			// 如果是数组类型，设置items
-			if input.Type == "array" {
-				propertySchema.Items = openapi3.NewSchemaRef("", &openapi3.Schema{
-					Type: &openapi3.Types{openapi3.TypeString},
-				})
-			}
+			propertySchema := createParameterSchema(input)
 			requestBodySchema.Properties[input.Name] = openapi3.NewSchemaRef("", propertySchema)
 			// 设置必填字段
 			if input.Required {
@@ -244,7 +220,7 @@ func createRequestBody(inputs []interfaces.ParameterDef) *interfaces.RequestBody
 
 // 处理输出参数
 // 根据处理输出参数创建响应体
-func createResponseBody(outputs []interfaces.ParameterDef) []*interfaces.Response {
+func createResponseBody(outputs []*interfaces.ParameterDef) []*interfaces.Response {
 	// 创建schema定义
 	responseSchema := openapi3.NewObjectSchema()
 	responseSchema.Properties["stdout"] = openapi3.NewSchemaRef("", &openapi3.Schema{
@@ -262,28 +238,7 @@ func createResponseBody(outputs []interfaces.ParameterDef) []*interfaces.Respons
 		Properties:  make(openapi3.Schemas),
 	}
 	for _, output := range outputs {
-		propertySchema := &openapi3.Schema{
-			Type:        mapTypeToOpenAPI(output.Type),
-			Description: output.Description,
-		}
-		// 设置默认值
-		if output.Default != nil {
-			propertySchema.Default = output.Default
-		}
-		// 设置枚举值
-		if len(output.Enum) > 0 {
-			propertySchema.Enum = output.Enum
-		}
-		// 设置示例值
-		if output.Example != nil {
-			propertySchema.Example = output.Example
-		}
-		// 如果是数组类型，设置items
-		if output.Type == "array" {
-			propertySchema.Items = openapi3.NewSchemaRef("", &openapi3.Schema{
-				Type: &openapi3.Types{openapi3.TypeString},
-			})
-		}
+		propertySchema := createParameterSchema(output)
 		resultSchema.Properties[output.Name] = openapi3.NewSchemaRef("", propertySchema)
 		// 设置必填字段
 		if output.Required {
@@ -382,61 +337,53 @@ func mapTypeToOpenAPI(paramType string) *openapi3.Types {
 	}
 }
 
-// createRequestBody 创建请求体结构
-// func (fi *FunctionInput) createRequestBody() *RequestBody {
-// 	if len(fi.Inputs) == 0 {
-// 		return nil
-// 	}
+func createParameterSchema(param *interfaces.ParameterDef) *openapi3.Schema {
+	if param.Description == "" {
+		param.Description = param.Name
+	}
+	propertySchema := &openapi3.Schema{
+		Type:        mapTypeToOpenAPI(string(param.Type)),
+		Description: param.Description,
+	}
 
-// 	// 创建schema定义
-// 	schema := &openapi3.Schema{
-// 		Type:       "object",
-// 		Properties: make(map[string]*openapi3.SchemaRef),
-// 		Required:   []string{},
-// 	}
+	// 设置默认值
+	if param.Default != nil {
+		propertySchema.Default = param.Default
+	}
+	// 设置枚举值
+	if len(param.Enum) > 0 {
+		propertySchema.Enum = param.Enum
+	}
+	// 设置示例值
+	if param.Example != nil {
+		propertySchema.Example = param.Example
+	}
+	// 处理嵌套参数
+	if len(param.SubParameters) > 0 {
+		switch param.Type {
+		case interfaces.ParameterTypeObject:
+			// Object类型：SubParameters定义对象的属性
+			propertySchema.Properties = make(openapi3.Schemas)
+			for _, subParam := range param.SubParameters {
+				subPropertySchema := createParameterSchema(subParam)
+				propertySchema.Properties[subParam.Name] = openapi3.NewSchemaRef("", subPropertySchema)
+				// 子对象的必填字段需要添加到父对象的Required数组中
+				if subParam.Required {
+					propertySchema.Required = append(propertySchema.Required, subParam.Name)
+				}
+			}
 
-// 	// 将Inputs转换为schema属性
-// 	for _, input := range fi.Inputs {
-// 		propertySchema := &openapi3.Schema{
-// 			Type:        fi.mapTypeToOpenAPI(input.Type),
-// 			Description: input.Description,
-// 		}
+		case interfaces.ParameterTypeArray:
+			// Array类型：SubParameters只包含一个元素，定义数组元素的结构
+			subParam := param.SubParameters[0]
+			if subParam.Description == "" {
+				subParam.Description = param.Description
+			}
+			itemsSchema := createParameterSchema(subParam)
+			propertySchema.Items = openapi3.NewSchemaRef("", itemsSchema)
 
-// 		// 设置默认值
-// 		if input.Default != nil {
-// 			propertySchema.Default = input.Default
-// 		}
-
-// 		// 设置枚举值
-// 		if len(input.Enum) > 0 {
-// 			propertySchema.Enum = make([]interface{}, len(input.Enum))
-// 			for i, enumVal := range input.Enum {
-// 				propertySchema.Enum[i] = enumVal
-// 			}
-// 		}
-
-// 		// 设置示例值
-// 		if input.Example != nil {
-// 			propertySchema.Example = input.Example
-// 		}
-
-// 		schema.Properties[input.Name] = &openapi3.SchemaRef{Value: propertySchema}
-
-// 		// 如果是必填参数，添加到required列表
-// 		if input.Required {
-// 			schema.Required = append(schema.Required, input.Name)
-// 		}
-// 	}
-
-// 	// 创建内容
-// 	content := openapi3.NewContent()
-// 	content["application/json"] = &openapi3.MediaType{
-// 		Schema: &openapi3.SchemaRef{Value: schema},
-// 	}
-
-// 	return &interfaces.RequestBody{
-// 		Description: "函数输入参数",
-// 		Content:     content,
-// 		Required:    true,
-// 	}
-// }
+		case interfaces.ParameterTypeString, interfaces.ParameterTypeNumber, interfaces.ParameterTypeBoolean:
+		}
+	}
+	return propertySchema
+}

@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/google/uuid"
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	icommon "github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common"
 	infraerrors "github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/telemetry"
@@ -15,8 +17,6 @@ import (
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/common"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metric"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
-	"github.com/google/uuid"
 )
 
 // EditOperator 编辑算子（仅支持编辑当前版本）
@@ -66,7 +66,7 @@ func (m *operatorManager) EditOperator(ctx context.Context, req *interfaces.Oper
 
 // editOperator
 func (m *operatorManager) editOperator(ctx context.Context, req *interfaces.OperatorEditReq, operator *model.OperatorRegisterDB,
-	metadataDB interfaces.Metadata, needUpdateMetadata, directPublish, isDataSource bool) (resp *interfaces.OperatorEditResp, err error) {
+	metadataDB interfaces.IMetadataDB, needUpdateMetadata, directPublish, isDataSource bool) (resp *interfaces.OperatorEditResp, err error) {
 	// 判断名字是否变更
 	var nameChanged bool
 	if req.Name != "" && req.Name != operator.Name {
@@ -290,7 +290,7 @@ func (m *operatorManager) checkDuplicateName(ctx context.Context, name, operator
 
 // 编辑前置检查:校验编辑请求的合法性: 检查数据是否存在、是否合法、是否有权限修改，并返回查询信息
 func (m *operatorManager) preCheckEdit(ctx context.Context, req *interfaces.OperatorEditReq, directPublish bool) (operatorDB *model.OperatorRegisterDB,
-	metadataDB interfaces.Metadata, accessor *interfaces.AuthAccessor, needUpdateMetadata bool, err error) {
+	metadataDB interfaces.IMetadataDB, accessor *interfaces.AuthAccessor, needUpdateMetadata bool, err error) {
 	// 获取算子
 	var has bool
 	has, operatorDB, err = m.DBOperatorManager.SelectByOperatorID(ctx, nil, req.OperatorID)
@@ -338,7 +338,7 @@ func (m *operatorManager) preCheckEdit(ctx context.Context, req *interfaces.Oper
 		m.Logger.WithContext(ctx).Warnf("select api metadata failed, OperatorID: %s, Version: %s, err: %v", operatorDB.OperatorID, operatorDB.MetadataVersion, err)
 		return
 	}
-	var updateMetadataDB interfaces.Metadata
+	var updateMetadataDB interfaces.IMetadataDB
 	updateMetadataDB, err = m.getUpdateMetadataDB(ctx, req, operatorDB, metadataDB)
 	if err != nil { // 不需要更新元数据
 		return
@@ -388,14 +388,14 @@ func (m *operatorManager) preCheckEdit(ctx context.Context, req *interfaces.Oper
 
 // 获取待更新的元数据
 func (m *operatorManager) getUpdateMetadataDB(ctx context.Context, req *interfaces.OperatorEditReq, operatorDB *model.OperatorRegisterDB,
-	metadataDB interfaces.Metadata) (updateMetadataDB interfaces.Metadata, err error) {
+	metadataDB interfaces.IMetadataDB) (updateMetadataDB interfaces.IMetadataDB, err error) {
 	// 解析传入数据
 	switch req.MetadataType {
 	case interfaces.MetadataTypeAPI:
 		if req.OpenAPIInput == nil || req.Data == nil {
 			return
 		}
-		var updateMetadataDBs []interfaces.Metadata
+		var updateMetadataDBs []interfaces.IMetadataDB
 		updateMetadataDBs, err = m.MetadataService.ParseMetadata(ctx, req.MetadataType, req.OpenAPIInput)
 		if err != nil {
 			return
@@ -433,7 +433,7 @@ func (m *operatorManager) getUpdateMetadataDB(ctx context.Context, req *interfac
 			Code:         req.FunctionInputEdit.Code,
 			Dependencies: req.FunctionInputEdit.Dependencies,
 		}
-		var updateMetadataDBs []interfaces.Metadata
+		var updateMetadataDBs []interfaces.IMetadataDB
 		updateMetadataDBs, err = m.MetadataService.ParseMetadata(ctx, req.MetadataType, funcInput)
 		if err != nil {
 			return
@@ -447,62 +447,9 @@ func (m *operatorManager) getUpdateMetadataDB(ctx context.Context, req *interfac
 	return
 }
 
-// // 构造元数据编辑参数
-// func (m *operatorManager) buildEditMetdataParam(ctx context.Context, req *interfaces.OperatorEditReq, metadataDB interfaces.Metadata) (editMetdataParam *interfaces.APIMetadataEdit, err error) {
-// 	editMetdataParam = &interfaces.APIMetadataEdit{
-// 		Summary:     metadata.Summary,
-// 		Description: req.Description,
-// 		Path:        metadata.Path,
-// 		Method:      metadata.Method,
-// 		ServerURL:   metadata.ServerURL,
-// 	}
-// 	if req.MetadataType == interfaces.MetadataTypeAPI && req.Data != nil {
-// 		// 检查导入的元数据信息
-// 		var item *interfaces.PathItemContent
-// 		item, err = m.OpenAPIParser.GetPathItemContent(ctx, req.Data, metadata.Path, metadata.Method)
-// 		if err != nil {
-// 			m.Logger.WithContext(ctx).Warnf("get path item content failed, err: %v", err)
-// 			httErr := &infraerrors.HTTPError{}
-// 			if errors.As(err, &httErr) && httErr.HTTPCode == http.StatusNotFound {
-// 				err = httErr.WithDescription(infraerrors.ErrExtOperatorNotExistInFile)
-// 			}
-// 			return
-// 		}
-// 		if item.Summary != "" {
-// 			err = m.Validator.ValidateOperatorName(ctx, item.Summary)
-// 			if err != nil {
-// 				return
-// 			}
-// 		}
-// 		editMetdataParam.Summary = item.Summary
-// 		editMetdataParam.ServerURL = item.ServerURL
-// 		editMetdataParam.APISpec = item.APISpec
-// 	}
-// 	err = m.Validator.ValidatorStruct(ctx, editMetdataParam)
-// 	return
-// }
-
-// 构建元数据更新参数
-// func (m *operatorManager) buildUpdateMetdataParam(ctx context.Context, metadataDB interfaces.Metadata) (editMetdataParam *interfaces.APIMetadataEdit, err error) {
-// 	editMetdataParam = &interfaces.APIMetadataEdit{
-// 		Summary:     item.Summary,
-// 		Description: item.Description,
-// 		Path:        item.Path,
-// 		Method:      item.Method,
-// 		ServerURL:   item.ServerURL,
-// 		APISpec:     item.APISpec,
-// 	}
-// 	err = m.Validator.ValidateOperatorName(ctx, item.Summary)
-// 	if err != nil {
-// 		return
-// 	}
-// 	err = m.Validator.ValidatorStruct(ctx, editMetdataParam)
-// 	return
-// }
-
 // modifyOperatorInfo 修改算子注册配置
 func (m *operatorManager) modifyOperatorInfo(ctx context.Context, tx *sql.Tx, req *interfaces.OperatorEditReq, operator *model.OperatorRegisterDB,
-	metdataDB interfaces.Metadata, needUpdateMetadata, isDataSource bool) (err error) {
+	metdataDB interfaces.IMetadataDB, needUpdateMetadata, isDataSource bool) (err error) {
 	err = m.modifyOperator(ctx, tx, req, operator, isDataSource)
 	if err != nil {
 		return
@@ -562,97 +509,6 @@ func (m *operatorManager) modifyOperator(ctx context.Context, tx *sql.Tx, req *i
 	return
 }
 
-// modifyMetadata 编辑元数据
-// func (m *operatorManager) modifyAPIMetadata(ctx context.Context, tx *sql.Tx, metdataDB interfaces.Metadata, userID string) (err error) {
-// 	// 记录可观测
-// 	ctx, _ = o11y.StartInternalSpan(ctx)
-// 	defer o11y.EndSpan(ctx, err)
-// 	if editParam == nil {
-// 		// 不需要编辑元数据
-// 		return
-// 	}
-// 	// 判断是否需要更新元数据
-// 	var needUpdate bool
-// 	// 允许编辑的字段
-// 	if editParam.ServerURL != "" && editParam.ServerURL != metdata.ServerURL {
-// 		metdata.ServerURL = editParam.ServerURL
-// 		needUpdate = true
-// 	}
-// 	if editParam.Description != "" && editParam.Description != metdata.Description {
-// 		metdata.Description = editParam.Description
-// 		needUpdate = true
-// 	}
-// 	if editParam.Summary != "" && editParam.Summary != metdata.Summary {
-// 		metdata.Summary = editParam.Summary
-// 		needUpdate = true
-// 	}
-// 	if editParam.APISpec != nil {
-// 		metdata.APISpec = utils.ObjectToJSON(editParam.APISpec)
-// 		needUpdate = true
-// 	}
-// 	if !needUpdate {
-// 		// 不需要更新元数据
-// 		return
-// 	}
-// 	metdata.UpdateUser = userID
-// 	err = m.DBAPIMetadataManager.UpdateByVersion(ctx, tx, metdata.Version, metdata)
-// 	if err != nil {
-// 		m.Logger.WithContext(ctx).Warnf("update api metadata failed, Version: %s, err: %v", metdata.Version, err)
-// 		err = infraerrors.DefaultHTTPError(ctx, http.StatusInternalServerError, "update api metadata failed")
-// 	}
-// 	return
-// }
-
-// 升级元数据
-// func (m *operatorManager) upgradeAPIMetadata(ctx context.Context, tx *sql.Tx, editParam *interfaces.APIMetadataEdit, metdata *model.APIMetadataDB, userID string) (version string, err error) {
-// 	// 记录可观测
-// 	ctx, _ = o11y.StartInternalSpan(ctx)
-// 	defer o11y.EndSpan(ctx, err)
-// 	if editParam == nil {
-// 		// 不需要编辑元数据
-// 		version = metdata.Version
-// 		return
-// 	}
-// 	var needUpdate bool
-// 	// 允许编辑的字段
-// 	if editParam.ServerURL != "" && editParam.ServerURL != metdata.ServerURL {
-// 		metdata.ServerURL = editParam.ServerURL
-// 		needUpdate = true
-// 	}
-// 	if editParam.Description != "" && editParam.Description != metdata.Description {
-// 		metdata.Description = editParam.Description
-// 		needUpdate = true
-// 	}
-// 	if editParam.Summary != "" && editParam.Summary != metdata.Summary {
-// 		metdata.Summary = editParam.Summary
-// 		needUpdate = true
-// 	}
-// 	if editParam.Path != "" && editParam.Path != metdata.Path {
-// 		metdata.Path = editParam.Path
-// 		needUpdate = true
-// 	}
-// 	if editParam.Method != "" && editParam.Method != metdata.Method {
-// 		metdata.Method = editParam.Method
-// 		needUpdate = true
-// 	}
-// 	if editParam.APISpec != nil {
-// 		metdata.APISpec = utils.ObjectToJSON(editParam.APISpec)
-// 		needUpdate = true
-// 	}
-// 	if !needUpdate {
-// 		// 不需要更新元数据
-// 		version = metdata.Version
-// 		return
-// 	}
-// 	metdata.Version = ""
-// 	version, err = m.DBAPIMetadataManager.InsertAPIMetadata(ctx, tx, metdata)
-// 	if err != nil {
-// 		m.Logger.WithContext(ctx).Errorf("insert api metadata failed, Version: %s, err: %v", metdata.Version, err)
-// 		err = infraerrors.DefaultHTTPError(ctx, http.StatusInternalServerError, "insert api metadata failed")
-// 	}
-// 	return
-// }
-
 // upgradeOperatorInfo 升级算子信息
 /*
 	已发布版本元数据出现变更，因此需要生成一条新的元数据记录
@@ -662,7 +518,7 @@ func (m *operatorManager) modifyOperator(ctx context.Context, tx *sql.Tx, req *i
 */
 
 func (m *operatorManager) upgradeOperatorInfo(ctx context.Context, tx *sql.Tx, req *interfaces.OperatorEditReq, operator *model.OperatorRegisterDB,
-	metadataDB interfaces.Metadata, needUpdateMetadata, isDataSource bool) (err error) {
+	metadataDB interfaces.IMetadataDB, needUpdateMetadata, isDataSource bool) (err error) {
 	// 记录可观测
 	ctx, _ = o11y.StartInternalSpan(ctx)
 	defer o11y.EndSpan(ctx, err)

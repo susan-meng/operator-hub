@@ -14,16 +14,27 @@ import (
 	"sync"
 	"unicode/utf8"
 
+	"github.com/asaskevich/govalidator"
+	validatorv10 "github.com/go-playground/validator/v10"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/config"
 	myErr "github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
-	"github.com/asaskevich/govalidator"
-	validatorv10 "github.com/go-playground/validator/v10"
 )
 
 const (
 	defaultNameMaxLength = 50 // 算子名称最大长度(字符)
+)
+
+var (
+	// 验证类型
+	validParameterTypes = map[interfaces.ParameterType]bool{
+		interfaces.ParameterTypeString:  true,
+		interfaces.ParameterTypeNumber:  true,
+		interfaces.ParameterTypeBoolean: true,
+		interfaces.ParameterTypeArray:   true,
+		interfaces.ParameterTypeObject:  true,
+	}
 )
 
 // Validator 验证器接口
@@ -312,4 +323,53 @@ func (v *validator) ValidatorURL(ctx context.Context, url string) (err error) {
 		err = myErr.NewHTTPError(ctx, http.StatusBadRequest, myErr.ErrExtOpenAPIInvalidURLFormat, err.Error())
 	}
 	return
+}
+
+// VisitorParameterDef 访问参数定义
+func (v *validator) VisitorParameterDef(ctx context.Context, paramDef *interfaces.ParameterDef) (err error) {
+	if paramDef == nil {
+		err = myErr.DefaultHTTPError(ctx, http.StatusBadRequest, "parameter def cannot be nil")
+		return
+	}
+
+	if paramDef.Type != "" && !validParameterTypes[paramDef.Type] {
+		err = fmt.Errorf("parameter %s type %s is invalid, must be string, number, boolean, array, object", paramDef.Name, paramDef.Type)
+		err = myErr.NewHTTPError(ctx, http.StatusBadRequest, myErr.ErrExtFunctionInvalidParameterType, err.Error(), paramDef.Name, paramDef.Type)
+		return
+	}
+
+	// 验证 SubParameters 只能用于 array 和 object 类型
+	if len(paramDef.SubParameters) > 0 {
+		if paramDef.Type != "array" && paramDef.Type != "object" {
+			err = fmt.Errorf("parameter %s type %s is invalid, must be array or object", paramDef.Name, paramDef.Type)
+			err = myErr.NewHTTPError(ctx, http.StatusBadRequest, myErr.ErrExtFunctionInvalidParameterSubParameters, err.Error(), paramDef.Name, paramDef.Type)
+			return
+		}
+
+		// 对于 array 类型,SubParameters 应该只有一个元素
+		if paramDef.Type == "array" && len(paramDef.SubParameters) != 1 {
+			err = fmt.Errorf("parameter %s is array type, sub_parameters must only contain one element to define the structure of array items, current has %d elements",
+				paramDef.Name, len(paramDef.SubParameters))
+			err = myErr.NewHTTPError(ctx, http.StatusBadRequest, myErr.ErrExtFunctionInvalidParameterSubParametersCount, err.Error(), paramDef.Name, len(paramDef.SubParameters))
+			return
+		}
+
+		// 递归验证所有子参数
+		for _, subParam := range paramDef.SubParameters {
+			if err = v.VisitorParameterDef(ctx, subParam); err != nil {
+				return
+			}
+		}
+	}
+	if paramDef.Type == "array" && len(paramDef.SubParameters) == 0 {
+		// 为 array 类型添加默认子参数
+		paramDef.SubParameters = []*interfaces.ParameterDef{
+			{
+				Type:        "string",
+				Description: paramDef.Description,
+				Required:    false,
+			},
+		}
+	}
+	return nil
 }

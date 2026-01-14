@@ -5,7 +5,7 @@ import (
 	"database/sql"
 )
 
-//go:generate mockgen -source=intcomp_config.go -destination=../mocks/intcomp_config.go -package=mocks
+//go:generate mockgen -source=logics_intcomp_config.go -destination=../mocks/intcomp_config.go -package=mocks
 
 // ComponentType 组件类型
 type ComponentType string

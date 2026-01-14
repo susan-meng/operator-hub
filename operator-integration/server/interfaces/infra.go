@@ -105,3 +105,22 @@ type Cache interface {
 type MetricLogger interface {
 	Log(ctx context.Context, logType string, params interface{}) (err error)
 }
+
+// Validator 验证接口:用于验证算子名称、描述、单次导入个数、导入数据大小等
+type Validator interface {
+	ValidateOperatorName(ctx context.Context, name string) (err error)
+	ValidateOperatorDesc(ctx context.Context, desc string) (err error)
+	ValidateOperatorImportCount(ctx context.Context, count int64) (err error)
+	ValidateOperatorImportSize(ctx context.Context, size int64) (err error)
+	ValidatorToolBoxName(ctx context.Context, name string) (err error)
+	ValidatorToolBoxDesc(ctx context.Context, desc string) (err error)
+	ValidatorToolName(ctx context.Context, name string) (err error)
+	ValidatorToolDesc(ctx context.Context, desc string) (err error)
+	ValidatorIntCompVersion(ctx context.Context, version string) (err error)
+	ValidatorMCPName(ctx context.Context, name string) (err error)
+	ValidatorMCPDesc(ctx context.Context, desc string) (err error)
+	ValidatorCategoryName(ctx context.Context, name string) (err error)
+	ValidatorStruct(ctx context.Context, obj interface{}) (err error)
+	ValidatorURL(ctx context.Context, url string) (err error)
+	VisitorParameterDef(ctx context.Context, paramDef *ParameterDef) (err error)
+}

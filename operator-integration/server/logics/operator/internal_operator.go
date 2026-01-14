@@ -7,14 +7,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/google/uuid"
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces/model"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metric"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
-	"github.com/google/uuid"
 )
 
 // RegisterInternalOperator 注册内置算子
@@ -36,7 +36,7 @@ func (m *operatorManager) RegisterInternalOperator(ctx context.Context, req *int
 		return
 	}
 	// 解析元数据
-	var metadataList []interfaces.Metadata
+	var metadataList []interfaces.IMetadataDB
 	switch req.MetadataType {
 	case interfaces.MetadataTypeAPI:
 		metadataList, err = m.MetadataService.ParseMetadata(ctx, req.MetadataType, req.OpenAPIInput)
@@ -45,7 +45,7 @@ func (m *operatorManager) RegisterInternalOperator(ctx context.Context, req *int
 			return
 		}
 	case interfaces.MetadataTypeFunc:
-		var metadatas []interfaces.Metadata
+		var metadatas []interfaces.IMetadataDB
 		for _, funcInput := range req.Functions {
 			metadatas, err = m.MetadataService.ParseMetadata(ctx, req.MetadataType, funcInput)
 			if err != nil {
@@ -151,7 +151,7 @@ func (m *operatorManager) RegisterInternalOperator(ctx context.Context, req *int
 
 // 创建内置算子
 func (m *operatorManager) createInternalOperator(ctx context.Context, tx *sql.Tx, operatorDB *model.OperatorRegisterDB,
-	metadataDB interfaces.Metadata, config *interfaces.IntCompConfig, userID, businessDomainId string) (resp *interfaces.OperatorRegisterResp, err error) {
+	metadataDB interfaces.IMetadataDB, config *interfaces.IntCompConfig, userID, businessDomainId string) (resp *interfaces.OperatorRegisterResp, err error) {
 	// 记录可观测
 	ctx, _ = o11y.StartInternalSpan(ctx)
 	defer o11y.EndSpan(ctx, err)
@@ -247,7 +247,7 @@ func (m *operatorManager) createInternalOperator(ctx context.Context, tx *sql.Tx
 
 // 升级内置算子
 func (m *operatorManager) upgradeInternalOperator(ctx context.Context, tx *sql.Tx, operatorDB *model.OperatorRegisterDB,
-	metadataDB interfaces.Metadata, config *interfaces.IntCompConfig, name, userID string) (resp *interfaces.OperatorRegisterResp, err error) {
+	metadataDB interfaces.IMetadataDB, config *interfaces.IntCompConfig, name, userID string) (resp *interfaces.OperatorRegisterResp, err error) {
 	// 记录可观测
 	ctx, _ = o11y.StartInternalSpan(ctx)
 	defer o11y.EndSpan(ctx, err)

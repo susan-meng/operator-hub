@@ -9,12 +9,12 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/go-playground/validator/v10"
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces/model"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
-	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/go-playground/validator/v10"
 )
 
 // openAPIParser OpenAPI解析器
@@ -41,7 +41,7 @@ func (op *openAPIParser) validate(ctx context.Context, inputValue any) (input *i
 }
 
 // Parse 解析OpenAPI元数据
-func (op *openAPIParser) Parse(ctx context.Context, inputValue any) (metadata []interfaces.Metadata, err error) {
+func (op *openAPIParser) Parse(ctx context.Context, inputValue any) (metadata []interfaces.IMetadataDB, err error) {
 	// 记录可观测性
 	ctx, _ = o11y.StartInternalSpan(ctx)
 	defer o11y.EndSpan(ctx, err)
@@ -49,7 +49,7 @@ func (op *openAPIParser) Parse(ctx context.Context, inputValue any) (metadata []
 	if err != nil {
 		return nil, err
 	}
-	metadata = make([]interfaces.Metadata, 0)
+	metadata = make([]interfaces.IMetadataDB, 0)
 	content, err := op.getAllContent(ctx, input.Data)
 	if err != nil {
 		return nil, err
@@ -97,64 +97,6 @@ func (op *openAPIParser) loadAndValidate(ctx context.Context, content []byte) (d
 	}
 	return
 }
-
-// GetPathItems 解析
-// func (op *openAPIParser) GetPathItems(ctx context.Context, data []byte) (items []*interfaces.PathItemContent, err error) {
-// 	doc, err := op.loadAndValidate(ctx, data)
-// 	if err != nil {
-// 		return
-// 	}
-// 	items = []*interfaces.PathItemContent{}
-// 	svcURL, err := getServerURL(ctx, doc.Servers)
-// 	if err != nil {
-// 		return
-// 	}
-
-// 	for path, pathItem := range doc.Paths.Map() {
-// 		for method, operation := range pathItem.Operations() {
-// 			// 收集所有schemas
-// 			schemas := make(map[string]interface{})
-// 			if operation.Summary == "" {
-// 				err = errors.NewHTTPError(ctx, http.StatusBadRequest, errors.ErrExtOpenAPIInvalidSpecificationSummaryEmpty, "summary is empty",
-// 					fmt.Sprintf("%s:%s", method, path))
-// 				return
-// 			}
-// 			item := &interfaces.PathItemContent{
-// 				Path:        path,
-// 				Method:      method,
-// 				Summary:     operation.Summary,
-// 				Description: operation.Description,
-// 				ServerURL:   svcURL,
-// 				APISpec: &interfaces.APISpec{
-// 					Callbacks:    operation.Callbacks,
-// 					Security:     operation.Security,
-// 					Tags:         operation.Tags,
-// 					ExternalDocs: operation.ExternalDocs,
-// 					Parameters:   []*interfaces.Parameter{},
-// 					Responses:    []*interfaces.Response{},
-// 					RequestBody:  &interfaces.RequestBody{},
-// 					Components: &interfaces.Components{
-// 						Schemas: schemas,
-// 					},
-// 				},
-// 			}
-// 			// 处理参数
-// 			item.APISpec.Parameters = getParameters(operation.Parameters, doc.Components, schemas)
-// 			// 处理请求体
-// 			if operation.RequestBody != nil {
-// 				item.APISpec.RequestBody = getRequestBody(operation.RequestBody, doc.Components, schemas)
-// 			}
-// 			// 处理响应
-// 			item.APISpec.Responses = getResponses(operation.Responses, doc.Components, schemas)
-// 			err = validator.New().Struct(item)
-// 			if err != nil {
-// 				item.ErrMessage = err.Error()
-// 			}
-// 			items = append(items, item)
-// 		}
-// 	}
-// 	return
-// }
 
 // GetAllContent 解析所有内容
 func (op *openAPIParser) getAllContent(ctx context.Context, data []byte) (content *interfaces.OpenAPIContent, err error) {
@@ -484,28 +426,3 @@ func schemaToMap(schemaRef *openapi3.SchemaRef) map[string]interface{} {
 
 	return result
 }
-
-// // GetPathItemContent 获取指定路径项内容
-// func (op *openAPIParser) GetPathItemContent(ctx context.Context, data []byte, path, method string) (content *interfaces.PathItemContent, err error) {
-// 	// 解析OpenAPI文档
-// 	items, err := op.GetPathItems(ctx, data)
-// 	if err != nil {
-// 		return
-// 	}
-// 	// 获取指定路径项
-// 	for _, item := range items {
-// 		if item.Path != path || item.Method != method {
-// 			continue
-// 		}
-// 		validator := validator.New()
-// 		err = validator.Struct(item)
-// 		if err != nil {
-// 			return
-// 		}
-// 		content = item
-// 		return
-// 	}
-// 	err = errors.NewHTTPError(ctx, http.StatusNotFound, errors.ErrExtCommonNoMatchedMethodPath,
-// 		fmt.Sprintf("no matched method path found, path: %s, method: %s", path, method))
-// 	return
-// }

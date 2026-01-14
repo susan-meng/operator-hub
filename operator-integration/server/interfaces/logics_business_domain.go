@@ -4,6 +4,8 @@ import (
 	"context"
 )
 
+//go:generate mockgen -source=logics_business_domain.go -destination=../mocks/logics_business_domain.go -package=mocks
+
 // IBusinessDomainService 业务域服务接口
 type IBusinessDomainService interface {
 	// AssociateResource 关联资源到业务域

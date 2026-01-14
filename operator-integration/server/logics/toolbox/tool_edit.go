@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common"
 	infraerrors "github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/telemetry"
@@ -13,7 +14,6 @@ import (
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces/model"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metric"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 )
 
 // UpdateTool 更新工具
@@ -135,7 +135,7 @@ func (s *ToolServiceImpl) updateToolMetadata(ctx context.Context, req *interface
 	case interfaces.MetadataTypeFunc:
 		needUpdate = req.FunctionInputEdit != nil && req.FunctionInputEdit.Code != ""
 	}
-	var metadatas []interfaces.Metadata
+	var metadatas []interfaces.IMetadataDB
 	if needUpdate {
 		switch toolDB.SourceType {
 		case model.SourceTypeOpenAPI:
@@ -198,7 +198,7 @@ func (s *ToolServiceImpl) updateToolMetadata(ctx context.Context, req *interface
 	switch toolDB.SourceType {
 	case model.SourceTypeOpenAPI:
 		// 解析并检查OpenAPI元数据
-		var metadata interfaces.Metadata
+		var metadata interfaces.IMetadataDB
 		for _, value := range metadatas {
 			if value.GetPath() == currentMetadataDB.GetPath() && value.GetMethod() == currentMetadataDB.GetMethod() {
 				metadata = value

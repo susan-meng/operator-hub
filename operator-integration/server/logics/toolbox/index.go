@@ -4,7 +4,6 @@
 package toolbox
 
 import (
-	"context"
 	"fmt"
 	"sync"
 
@@ -73,8 +72,4 @@ func NewToolServiceImpl() interfaces.IToolService {
 		}
 	})
 	return toolService
-}
-
-func (s *ToolServiceImpl) GetMetadata(ctx context.Context, boxID, tool string) (metadataDB interfaces.Metadata, err error) {
-	return
 }

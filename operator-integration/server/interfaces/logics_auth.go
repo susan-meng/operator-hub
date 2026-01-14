@@ -16,7 +16,7 @@ type AccountAuthContext struct {
 
 // AuthOperationType 操作类型
 //
-//go:generate mockgen -source=auth.go -destination=../mocks/auth.go -package=mocks
+//go:generate mockgen -source=logics_auth.go -destination=../mocks/auth.go -package=mocks
 type AuthOperationType string
 
 const (

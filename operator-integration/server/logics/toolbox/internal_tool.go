@@ -10,13 +10,13 @@ import (
 	"net/http"
 	"time"
 
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	infracommon "github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/telemetry"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces/model"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metric"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 )
 
 // 内置工具管理原则：工具箱只能属于一个服务，而一个服务可以有多个工具箱
@@ -34,7 +34,7 @@ func (s *ToolServiceImpl) CreateInternalToolBox(ctx context.Context, req *interf
 		req.UserID = interfaces.SystemUser
 	}
 	// 解析元数据
-	var metadataList []interfaces.Metadata
+	var metadataList []interfaces.IMetadataDB
 	switch req.MetadataType {
 	case interfaces.MetadataTypeAPI:
 		metadataList, err = s.MetadataService.ParseMetadata(ctx, req.MetadataType, req.OpenAPIInput)
@@ -43,7 +43,7 @@ func (s *ToolServiceImpl) CreateInternalToolBox(ctx context.Context, req *interf
 			return
 		}
 	case interfaces.MetadataTypeFunc:
-		var metadatas []interfaces.Metadata
+		var metadatas []interfaces.IMetadataDB
 		for _, funcInput := range req.Functions {
 			metadatas, err = s.MetadataService.ParseMetadata(ctx, req.MetadataType, funcInput)
 			if err != nil {
@@ -147,7 +147,7 @@ func (s *ToolServiceImpl) CreateInternalToolBox(ctx context.Context, req *interf
 
 // createInternalToolBox 添加内置工具箱
 func (s *ToolServiceImpl) createInternalToolBox(ctx context.Context, toolbox *model.ToolboxDB,
-	metadataList []interfaces.Metadata, toolList []*model.ToolDB, config *interfaces.IntCompConfig, userID string) (err error) {
+	metadataList []interfaces.IMetadataDB, toolList []*model.ToolDB, config *interfaces.IntCompConfig, userID string) (err error) {
 	// 记录可观测
 	ctx, _ = o11y.StartInternalSpan(ctx)
 	defer o11y.EndSpan(ctx, err)
@@ -240,7 +240,7 @@ func (s *ToolServiceImpl) createInternalToolBox(ctx context.Context, toolbox *mo
 }
 
 func (s *ToolServiceImpl) updateInternalToolBox(ctx context.Context, toolbox *model.ToolboxDB,
-	metadataList []interfaces.Metadata, toolList []*model.ToolDB, config *interfaces.IntCompConfig,
+	metadataList []interfaces.IMetadataDB, toolList []*model.ToolDB, config *interfaces.IntCompConfig,
 	userID, name string) (err error) {
 	// 记录可观测
 	ctx, _ = o11y.StartInternalSpan(ctx)
@@ -349,7 +349,7 @@ func (s *ToolServiceImpl) updateInternalToolBox(ctx context.Context, toolbox *mo
 }
 
 func (s *ToolServiceImpl) addInternalToolBox(ctx context.Context, tx *sql.Tx,
-	metadataList []interfaces.Metadata, toolList []*model.ToolDB) (err error) {
+	metadataList []interfaces.IMetadataDB, toolList []*model.ToolDB) (err error) {
 	// 添加元数据，添加工具
 	if len(metadataList) > 0 {
 		_, err = s.MetadataService.BatchRegisterMetadata(ctx, tx, metadataList)

@@ -5,7 +5,7 @@ import (
 	"database/sql"
 )
 
-//go:generate mockgen -source=toolbox.go -destination=../mocks/toolbox.go -package=mocks
+//go:generate mockgen -source=logics_toolbox.go -destination=../mocks/toolbox.go -package=mocks
 
 // ToolStatusType 工具状态类型
 type ToolStatusType string
@@ -420,14 +420,6 @@ type IToolService interface {
 	// Impex[*ToolBoxImpexData]
 	Import(ctx context.Context, tx *sql.Tx, mode ImportType, data *ComponentImpexConfigModel, userID string) (err error)
 	Export(ctx context.Context, req *ExportReq) (data *ComponentImpexConfigModel, err error)
-	// IInternalToolBoxService 内部操作接口
-	IInternalToolBoxService
-}
-
-// IInternalToolBoxService 内部操作接口
-type IInternalToolBoxService interface {
-	// GetMetadata 获取工具箱元数据
-	GetMetadata(ctx context.Context, boxID, tool string) (metadataDB Metadata, err error)
 }
 
 // CreateInternalToolBoxReq 内部工具箱注册请求

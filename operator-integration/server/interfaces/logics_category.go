@@ -4,7 +4,7 @@ import "context"
 
 // BizCategory 业务分类
 //
-//go:generate mockgen -source=category.go -destination=../mocks/category.go -package=mocks
+//go:generate mockgen -source=logics_category.go -destination=../mocks/category.go -package=mocks
 type BizCategory string
 
 func (c BizCategory) String() string {

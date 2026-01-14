@@ -6,13 +6,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/google/uuid"
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	infracommon "github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces/model"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metric"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
-	"github.com/google/uuid"
 )
 
 // CreateToolBox 工具箱管理
@@ -143,7 +143,7 @@ func (s *ToolServiceImpl) CreateToolBox(ctx context.Context, req *interfaces.Cre
 }
 
 // 解析并初始化默认值
-func (s *ToolServiceImpl) parseAndInitDefaultValues(ctx context.Context, req *interfaces.CreateToolBoxReq) (metadatas []interfaces.Metadata, err error) {
+func (s *ToolServiceImpl) parseAndInitDefaultValues(ctx context.Context, req *interfaces.CreateToolBoxReq) (metadatas []interfaces.IMetadataDB, err error) {
 	switch req.MetadataType {
 	case interfaces.MetadataTypeAPI:
 		if req.OpenAPIInput != nil && req.OpenAPIInput.Data != nil {
@@ -201,7 +201,7 @@ func (s *ToolServiceImpl) parseAndInitDefaultValues(ctx context.Context, req *in
 
 // 从元数据中提取工具信息
 func (s *ToolServiceImpl) parseOpenAPIToMetadata(ctx context.Context, boxID, userID string,
-	metadatas []interfaces.Metadata) (tools []*model.ToolDB, validatorNameMap, validatorMethodPathMap map[string]bool, err error) {
+	metadatas []interfaces.IMetadataDB) (tools []*model.ToolDB, validatorNameMap, validatorMethodPathMap map[string]bool, err error) {
 	// 检查工具是否重名
 	validatorMethodPathMap = make(map[string]bool)
 	validatorNameMap = make(map[string]bool)

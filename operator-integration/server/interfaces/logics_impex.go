@@ -8,6 +8,8 @@ import (
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces/model"
 )
 
+//go:generate mockgen -source=logics_impex.go -destination=../mocks/logics_impex.go -package=mocks
+
 // ImportType 导入类型
 type ImportType string
 

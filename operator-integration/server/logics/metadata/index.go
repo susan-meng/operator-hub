@@ -9,6 +9,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/google/uuid"
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/dbaccess"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/config"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
@@ -17,8 +19,6 @@ import (
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces/model"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/parsers"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
-	"github.com/google/uuid"
 )
 
 // metadataService 统一元数据管理服务
@@ -50,7 +50,7 @@ func NewMetadataService() interfaces.IMetadataService {
 }
 
 // GetMetadataBySource 根据SourceID、SourceType查询元数据
-func (m *metadataService) GetMetadataBySource(ctx context.Context, sourceID string, sourceType model.SourceType) (has bool, metadata interfaces.Metadata, err error) {
+func (m *metadataService) GetMetadataBySource(ctx context.Context, sourceID string, sourceType model.SourceType) (has bool, metadata interfaces.IMetadataDB, err error) {
 	// 记录可观测
 	ctx, _ = o11y.StartInternalSpan(ctx)
 	defer o11y.EndSpan(ctx, err)
@@ -80,11 +80,11 @@ func (m *metadataService) GetMetadataBySource(ctx context.Context, sourceID stri
 	return
 }
 
-func (m *metadataService) BatchGetMetadataBySourceIDs(ctx context.Context, sourceMap map[model.SourceType][]string) (sourceIDToMetadata map[string]interfaces.Metadata, err error) {
+func (m *metadataService) BatchGetMetadataBySourceIDs(ctx context.Context, sourceMap map[model.SourceType][]string) (sourceIDToMetadata map[string]interfaces.IMetadataDB, err error) {
 	// 记录可观测
 	ctx, _ = o11y.StartInternalSpan(ctx)
 	defer o11y.EndSpan(ctx, err)
-	sourceIDToMetadata = map[string]interfaces.Metadata{}
+	sourceIDToMetadata = map[string]interfaces.IMetadataDB{}
 	if len(sourceMap) == 0 {
 		return
 	}
@@ -152,7 +152,7 @@ func (m *metadataService) BatchGetMetadataBySourceIDs(ctx context.Context, sourc
 						operatorSourceMap[model.SourceType(operator.MetadataType)] = append(operatorSourceMap[model.SourceType(operator.MetadataType)],
 							operator.MetadataVersion)
 					}
-					var operatorSourceIDToMetadata map[string]interfaces.Metadata
+					var operatorSourceIDToMetadata map[string]interfaces.IMetadataDB
 					operatorSourceIDToMetadata, localErr = m.BatchGetMetadataBySourceIDs(ctx, operatorSourceMap)
 					if localErr != nil {
 						m.Logger.WithContext(ctx).Errorf("batch query operator metadata failed, err: %v", localErr)
@@ -190,7 +190,7 @@ func (m *metadataService) BatchGetMetadataBySourceIDs(ctx context.Context, sourc
 }
 
 // ParseMetadata 解析元数据
-func (m *metadataService) ParseMetadata(ctx context.Context, metadataType interfaces.MetadataType, input any) ([]interfaces.Metadata, error) {
+func (m *metadataService) ParseMetadata(ctx context.Context, metadataType interfaces.MetadataType, input any) ([]interfaces.IMetadataDB, error) {
 	parser, err := m.ParserRegistry.Get(metadataType)
 	if err != nil {
 		return nil, err
@@ -213,7 +213,7 @@ func (m *metadataService) ParseRawContent(ctx context.Context, metadataType inte
 }
 
 // RegisterMetadata 注册单个元数据
-func (m *metadataService) RegisterMetadata(ctx context.Context, tx *sql.Tx, metadata interfaces.Metadata) (version string, err error) {
+func (m *metadataService) RegisterMetadata(ctx context.Context, tx *sql.Tx, metadata interfaces.IMetadataDB) (version string, err error) {
 	// 验证元数据
 	err = m.ValidateMetadata(ctx, metadata)
 	if err != nil {
@@ -259,7 +259,7 @@ func (m *metadataService) RegisterMetadata(ctx context.Context, tx *sql.Tx, meta
 }
 
 // BatchRegisterMetadata 批量注册元数据
-func (m *metadataService) BatchRegisterMetadata(ctx context.Context, tx *sql.Tx, metadatas []interfaces.Metadata) (versions []string, err error) {
+func (m *metadataService) BatchRegisterMetadata(ctx context.Context, tx *sql.Tx, metadatas []interfaces.IMetadataDB) (versions []string, err error) {
 	if len(metadatas) == 0 {
 		return []string{}, nil
 	}
@@ -329,7 +329,7 @@ func (m *metadataService) BatchRegisterMetadata(ctx context.Context, tx *sql.Tx,
 
 // CheckMetadataExists 检查元数据是否存在
 func (m *metadataService) CheckMetadataExists(ctx context.Context, metadataType interfaces.MetadataType, version string) (exists bool,
-	metadata interfaces.Metadata, err error) {
+	metadata interfaces.IMetadataDB, err error) {
 	switch metadataType {
 	case interfaces.MetadataTypeAPI:
 		exists, metadata, err = m.APIMetadataDB.SelectByVersion(ctx, version)
@@ -353,7 +353,7 @@ func (m *metadataService) CheckMetadataExists(ctx context.Context, metadataType 
 }
 
 // GetMetadataByVersion 根据版本查询元数据
-func (m *metadataService) GetMetadataByVersion(ctx context.Context, metadataType interfaces.MetadataType, version string) (interfaces.Metadata, error) {
+func (m *metadataService) GetMetadataByVersion(ctx context.Context, metadataType interfaces.MetadataType, version string) (interfaces.IMetadataDB, error) {
 	switch metadataType {
 	case interfaces.MetadataTypeAPI:
 		exist, metadata, err := m.APIMetadataDB.SelectByVersion(ctx, version)
@@ -383,12 +383,12 @@ func (m *metadataService) GetMetadataByVersion(ctx context.Context, metadataType
 }
 
 // BatchGetMetadata 批量查询元数据
-func (m *metadataService) BatchGetMetadata(ctx context.Context, apiVersions, funcVersions []string) (result []interfaces.Metadata, err error) {
+func (m *metadataService) BatchGetMetadata(ctx context.Context, apiVersions, funcVersions []string) (result []interfaces.IMetadataDB, err error) {
 	// 并发查询API元数据
 	var apiMetadatas []*model.APIMetadataDB
 	var funcMetadatas []*model.FunctionMetadataDB
 	var apiErr, funcErr error
-	result = []interfaces.Metadata{}
+	result = []interfaces.IMetadataDB{}
 	var wg sync.WaitGroup
 
 	// 查询OpenAPI元数据
@@ -432,7 +432,7 @@ func (m *metadataService) BatchGetMetadata(ctx context.Context, apiVersions, fun
 }
 
 // UpdateMetadata 更新元数据
-func (m *metadataService) UpdateMetadata(ctx context.Context, tx *sql.Tx, metadata interfaces.Metadata) error {
+func (m *metadataService) UpdateMetadata(ctx context.Context, tx *sql.Tx, metadata interfaces.IMetadataDB) error {
 	// 验证元数据
 	err := m.ValidateMetadata(ctx, metadata)
 	if err != nil {
@@ -521,7 +521,7 @@ func (m *metadataService) BatchDeleteMetadata(ctx context.Context, tx *sql.Tx, m
 }
 
 // ValidateMetadata 验证元数据格式
-func (m *metadataService) ValidateMetadata(ctx context.Context, metadata interfaces.Metadata) error {
+func (m *metadataService) ValidateMetadata(ctx context.Context, metadata interfaces.IMetadataDB) error {
 	if metadata == nil {
 		return fmt.Errorf("metadata is nil")
 	}

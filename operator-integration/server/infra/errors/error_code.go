@@ -170,7 +170,10 @@ const (
 	ErrExtOpenAPIInvalidSpecificationSummaryEmpty ErrorCode = "OpenAPIInvalidSpecificationSummaryEmpty" // 该“%s”Summary为空, 请补充完整
 
 	// 函数校验
-	ErrExtFunctionNoHandlerFound ErrorCode = "FunctionNoHandlerFound" // 未检测到入口函数handler(event)，请检查函数代码是否正确
+	ErrExtFunctionNoHandlerFound                     ErrorCode = "FunctionNoHandlerFound"                     // 未检测到入口函数handler(event)，请检查函数代码是否正确
+	ErrExtFunctionInvalidParameterType               ErrorCode = "FunctionInvalidParameterType"               // 参数“%s”类型无效: %s, 必须是 string, number, boolean, array, object 之一
+	ErrExtFunctionInvalidParameterSubParameters      ErrorCode = "FunctionInvalidParameterSubParameters"      // 参数“%s”类型为 %s, 不支持 sub_parameters 字段, 只有 array 和 object 类型才能有子参数
+	ErrExtFunctionInvalidParameterSubParametersCount ErrorCode = "FunctionInvalidParameterSubParametersCount" // 参数“%s”是 array 类型, sub_parameters 必须只包含一个元素来定义数组项的结构, 当前有 %d 个元素
 )
 
 // 业务域 错误码

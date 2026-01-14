@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	infracommon "github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/telemetry"
@@ -12,7 +13,6 @@ import (
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces/model"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metric"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 )
 
 // CreateTool 工具管理
@@ -52,7 +52,7 @@ func (s *ToolServiceImpl) CreateTool(ctx context.Context, req *interfaces.Create
 		return
 	}
 	// 解析导入数据
-	var metadataList []interfaces.Metadata
+	var metadataList []interfaces.IMetadataDB
 	switch req.MetadataType {
 	case interfaces.MetadataTypeFunc:
 		metadataList, err = s.MetadataService.ParseMetadata(ctx, req.MetadataType, req.FunctionInput)
@@ -150,7 +150,7 @@ func (s *ToolServiceImpl) checkToolConflict(ctx context.Context, boxID string, v
 		}
 		// 获取元数据
 		var has bool
-		var metadata interfaces.Metadata
+		var metadata interfaces.IMetadataDB
 		has, metadata, err = s.MetadataService.GetMetadataBySource(ctx, tool.SourceID, tool.SourceType)
 		if err != nil {
 			failuresVailMap[tool.Name] = err
@@ -170,7 +170,7 @@ func (s *ToolServiceImpl) checkToolConflict(ctx context.Context, boxID string, v
 }
 
 // saveToolToBox 向工具箱内添加工具
-func (s *ToolServiceImpl) saveToolToBox(ctx context.Context, tool *model.ToolDB, metadata interfaces.Metadata) (toolID string, err error) {
+func (s *ToolServiceImpl) saveToolToBox(ctx context.Context, tool *model.ToolDB, metadata interfaces.IMetadataDB) (toolID string, err error) {
 	tx, err := s.DBTx.GetTx(ctx)
 	if err != nil {
 		err = errors.DefaultHTTPError(ctx, http.StatusInternalServerError, err.Error())

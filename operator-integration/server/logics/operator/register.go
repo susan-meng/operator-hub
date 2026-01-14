@@ -7,14 +7,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/google/uuid"
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces/model"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metric"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
-	"github.com/google/uuid"
 )
 
 // RegisterOperatorByOpenAPI 算子注册
@@ -167,7 +167,7 @@ func (m *operatorManager) UpdateOperatorByOpenAPI(ctx context.Context, req *inte
 }
 
 // validateOperator 校验算子信息
-func (m *operatorManager) validateOperator(ctx context.Context, metadataDB interfaces.Metadata) (err error) {
+func (m *operatorManager) validateOperator(ctx context.Context, metadataDB interfaces.IMetadataDB) (err error) {
 	if metadataDB.GetErrMessage() != "" {
 		err = errors.DefaultHTTPError(ctx, http.StatusBadRequest, metadataDB.GetErrMessage())
 		return
@@ -183,7 +183,7 @@ func (m *operatorManager) validateOperator(ctx context.Context, metadataDB inter
 }
 
 // checkAndParserOpenAPIOperator 检查并解析OpenAPI算子
-func (m *operatorManager) checkAndParserOpenAPIOperator(ctx context.Context, req *interfaces.OperatorRegisterReq) (metadataDBs []interfaces.Metadata, err error) {
+func (m *operatorManager) checkAndParserOpenAPIOperator(ctx context.Context, req *interfaces.OperatorRegisterReq) (metadataDBs []interfaces.IMetadataDB, err error) {
 	// 检查算子类型
 	if !m.CategoryManager.CheckCategory(req.OperatorInfo.Category) {
 		m.Logger.WithContext(ctx).Warnf("invalid operator category, category: %s", req.OperatorInfo.Category)
@@ -211,7 +211,7 @@ func (m *operatorManager) checkAndParserOpenAPIOperator(ctx context.Context, req
 	return
 }
 
-func (m *operatorManager) registerOperator(ctx context.Context, req *interfaces.OperatorRegisterReq, metadataDB interfaces.Metadata,
+func (m *operatorManager) registerOperator(ctx context.Context, req *interfaces.OperatorRegisterReq, metadataDB interfaces.IMetadataDB,
 	accessor *interfaces.AuthAccessor, status interfaces.BizStatus, isDataSource bool) (result *interfaces.OperatorRegisterResp) {
 	// 记录可观测
 	ctx, _ = o11y.StartInternalSpan(ctx)

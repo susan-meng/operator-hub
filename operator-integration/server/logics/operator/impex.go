@@ -7,6 +7,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/creasty/defaults"
+	"github.com/google/uuid"
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	icommon "github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
@@ -14,9 +17,6 @@ import (
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metadata"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metric"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
-	"github.com/creasty/defaults"
-	"github.com/google/uuid"
 )
 
 // Export 导出算子
@@ -197,7 +197,7 @@ func (m *operatorManager) batchImportOperatorMetadata(ctx context.Context, tx *s
 	for _, operatorItem := range items {
 		// 参数预备检查
 		var newOperatorDB *model.OperatorRegisterDB
-		var newMetadataDB interfaces.Metadata
+		var newMetadataDB interfaces.IMetadataDB
 		newOperatorDB, newMetadataDB, err = m.importCheck(ctx, operatorItem, accessor.ID)
 		if err != nil {
 			return
@@ -231,7 +231,7 @@ func (m *operatorManager) batchImportOperatorMetadata(ctx context.Context, tx *s
 }
 
 // 添加算子配置
-func (m *operatorManager) addOperatorConfig(ctx context.Context, tx *sql.Tx, operatorDB *model.OperatorRegisterDB, metadataDB interfaces.Metadata) (err error) {
+func (m *operatorManager) addOperatorConfig(ctx context.Context, tx *sql.Tx, operatorDB *model.OperatorRegisterDB, metadataDB interfaces.IMetadataDB) (err error) {
 	metadataDB.SetVersion(uuid.New().String())
 	version, err := m.MetadataService.RegisterMetadata(ctx, tx, metadataDB)
 	if err != nil {
@@ -251,7 +251,7 @@ func (m *operatorManager) addOperatorConfig(ctx context.Context, tx *sql.Tx, ope
 
 // 更新（升级）算子配置
 func (m *operatorManager) updateOperatorConfig(ctx context.Context, tx *sql.Tx, operatorDB,
-	newOperatorDB *model.OperatorRegisterDB, newMetadataDB interfaces.Metadata) (err error) {
+	newOperatorDB *model.OperatorRegisterDB, newMetadataDB interfaces.IMetadataDB) (err error) {
 	// 检查元数据类型是否一致
 	if operatorDB.MetadataType != newOperatorDB.MetadataType {
 		err = errors.NewHTTPError(ctx, http.StatusBadRequest, errors.ErrExtCommonMetadataTypeConflict,
@@ -275,7 +275,7 @@ func (m *operatorManager) updateOperatorConfig(ctx context.Context, tx *sql.Tx, 
 		operatorDB.MetadataVersion, err = m.MetadataService.RegisterMetadata(ctx, tx, newMetadataDB)
 	case interfaces.BizStatusUnpublish, interfaces.BizStatusEditing:
 		// 检查元数据是否存在
-		var metadataDB interfaces.Metadata
+		var metadataDB interfaces.IMetadataDB
 		var has bool
 		has, metadataDB, err = m.MetadataService.CheckMetadataExists(ctx, interfaces.MetadataType(newOperatorDB.MetadataType), operatorDB.MetadataVersion)
 		if err != nil {
@@ -313,7 +313,7 @@ func (m *operatorManager) updateOperatorConfig(ctx context.Context, tx *sql.Tx, 
 }
 
 func (m *operatorManager) importCheck(ctx context.Context, item *interfaces.OperatorImpexItem, userID string) (operatorDB *model.OperatorRegisterDB,
-	metadataDB interfaces.Metadata, err error) {
+	metadataDB interfaces.IMetadataDB, err error) {
 	// 校验算子信息
 	err = m.Validator.ValidateOperatorName(ctx, item.OperatorName)
 	if err != nil {

@@ -2149,7 +2149,15 @@
             "type": "array",
             "description": "参数枚举值",
             "items": {
-              "type": "object"
+              "type": "object",
+              "description": "枚举值"
+            }
+          },
+          "sub_parameters": {
+            "type": "array",
+            "description": "子参数列表; 当 type 为 array, object时有效; 当type=array时，仅第一个参数有效",
+            "items": {
+              "$ref": "#/components/schemas/FunctionParameterDef"
             }
           }
         }

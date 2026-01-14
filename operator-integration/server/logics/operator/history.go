@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"net/http"
 
+	jsoniter "github.com/json-iterator/go"
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces/model"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metadata"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
-	jsoniter "github.com/json-iterator/go"
 )
 
 // QueryOperatorHistoryDetail 查询操作历史详情
@@ -177,7 +177,7 @@ func (m *operatorManager) QueryOperatorHistoryList(ctx context.Context, req *int
 }
 
 // 组装算子信息结果
-func (m *operatorManager) assembleReleaseResult(ctx context.Context, releaseDB *model.OperatorReleaseDB, metadataDB interfaces.Metadata) (
+func (m *operatorManager) assembleReleaseResult(ctx context.Context, releaseDB *model.OperatorReleaseDB, metadataDB interfaces.IMetadataDB) (
 	userIDs []string, info *interfaces.OperatorDataInfo, err error) {
 	executeControl := &interfaces.OperatorExecuteControl{}
 	err = jsoniter.Unmarshal([]byte(releaseDB.ExecuteControl), executeControl)

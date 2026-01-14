@@ -3,7 +3,7 @@
 // @description: 定义算子操作接口
 package interfaces
 
-//go:generate mockgen -source=operator.go -destination=../mocks/operator.go -package=mocks
+//go:generate mockgen -source=logics_operator.go -destination=../mocks/operator.go -package=mocks
 import (
 	"context"
 	"database/sql"
@@ -268,9 +268,9 @@ type OperatorManager interface {
 
 // CheckAddAsToolResp 检查算子是否允许添加为工具响应
 type CheckAddAsToolResp struct {
-	OperatorID string   `json:"operator_id"`
-	Name       string   `json:"name"`
-	Metadata   Metadata `json:"metadata"`
+	OperatorID string      `json:"operator_id"`
+	Name       string      `json:"name"`
+	Metadata   IMetadataDB `json:"metadata"`
 }
 
 // InternalOperatorManager 内部操作接口

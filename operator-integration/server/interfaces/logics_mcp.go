@@ -9,6 +9,8 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
+//go:generate mockgen -source=logics_mcp.go -destination=../mocks/logics_mcp.go -package=mocks
+
 // MCPMode MCP运行模式
 type MCPMode string
 

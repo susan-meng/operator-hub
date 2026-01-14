@@ -15,15 +15,15 @@ class HTMLOnlyHandler(http.server.SimpleHTTPRequestHandler):
         except OSError:
             self.send_error(404, "No permission to list directory")
             return None
-        
+
         list.sort(key=lambda a: a.lower())
         displaypath = urllib.parse.unquote(self.path)
-        
+
         # 直接发送响应，而不是调用send_head()
         self.send_response(200)
         self.send_header("Content-type", "text/html; charset=utf-8")
         self.end_headers()
-        
+
         # 自定义HTML输出
         self.wfile.write(b'<!DOCTYPE html>\n')
         self.wfile.write(b'<html>\n<head>\n')
@@ -42,28 +42,28 @@ class HTMLOnlyHandler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(b'<h1>Directory listing for %s</h1>\n' % displaypath.encode('utf-8'))
         self.wfile.write(b'<hr>\n')
         self.wfile.write(b'<table>\n')
-        
+
         # 添加返回上级目录链接
         if displaypath != '/':
             parent_path = os.path.dirname(displaypath.rstrip('/'))
             if parent_path == '':
                 parent_path = '/'
             self.wfile.write(b'<tr><td><a href="%s">Parent Directory</a></td></tr>\n' % parent_path.encode('utf-8'))
-        
+
         # 只显示HTML文件和目录
         for name in list:
             fullname = os.path.join(path, name)
             displayname = linkname = name
-            
+
             # 如果是目录
             if os.path.isdir(fullname):
-                self.wfile.write(b'<tr><td><a href="%s/">%s/</a></td></tr>\n' % 
+                self.wfile.write(b'<tr><td><a href="%s/">%s/</a></td></tr>\n' %
                        (urllib.parse.quote(linkname).encode('utf-8'), displayname.encode('utf-8')))
             # 如果是HTML文件
             elif name.lower().endswith('.html'):
-                self.wfile.write(b'<tr><td><a href="%s">%s</a></td></tr>\n' % 
+                self.wfile.write(b'<tr><td><a href="%s">%s</a></td></tr>\n' %
                        (urllib.parse.quote(linkname).encode('utf-8'), displayname.encode('utf-8')))
-        
+
         self.wfile.write(b'</table>\n')
         self.wfile.write(b'</body>\n</html>\n')
         return None
@@ -73,21 +73,21 @@ class HTMLOnlyHandler(http.server.SimpleHTTPRequestHandler):
         path = path.split('?',1)[0]
         path = path.split('#',1)[0]
         path = urllib.parse.unquote(path)
-        
+
         # 移除开头的斜杠
         if path.startswith('/'):
             path = path[1:]
-        
+
         # 构建完整路径
         path = os.path.join(self.directory, path)
-        
+
         # 规范化路径
         path = os.path.normpath(path)
-        
+
         # 确保路径在允许的目录内
         if not path.startswith(self.directory):
             path = self.directory
-        
+
         return path
 
     def end_headers(self):
