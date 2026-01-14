@@ -1,0 +1,23 @@
+{
+    "mcp": {
+        "configs": [
+            {
+                "mode": "sse",
+                "url": "https://mcp.map.baidu.com/sse?ak=bW9A9vyhGcYmdKRvWJCkySpekiBUTeUL",
+                "mcp_id": "91f6c1bd-76ce-4831-bbd2-8578665b9929",
+                "version": 1,
+                "creation_type": "custom",
+                "name": "WkxaqVEP",
+                "description": "test mcp server",
+                "status": "unpublish",
+                "source": "custom",
+                "is_internal": false,
+                "category": "data_analysis",
+                "create_user": "90da0ae0-f04e-11f0-9711-3a5403cab1ac",
+                "create_time": 1768301100607907223,
+                "update_user": "90da0ae0-f04e-11f0-9711-3a5403cab1ac",
+                "update_time": 1768301100607907223
+            }
+        ]
+    }
+}
