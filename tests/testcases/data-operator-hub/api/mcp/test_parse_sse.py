@@ -163,7 +163,8 @@ class TestParseSSE:
         file = GetContent(configfile)
         config = file.config()
         host = config["server"]["host"]
-        token = GetToken(host=host).get_token(host, "A0", "111111")
+        user_password = config.get("user", "default_password", fallback="111111")
+        token = GetToken(host=host).get_token(host, "A0", user_password)
         access_token = token[1]
         sse_url = "http://" + host + sse_url + "?token=" + access_token
         stream_url = "http://" + host + stream_url + "?token=" + access_token
@@ -200,7 +201,8 @@ class TestParseSSE:
         file = GetContent(configfile)
         config = file.config()
         host = config["server"]["host"]
-        token = GetToken(host=host).get_token(host, "A0", "111111")
+        user_password = config.get("user", "default_password", fallback="111111")
+        token = GetToken(host=host).get_token(host, "A0", user_password)
         access_token = token[1]
         sse_url = "http://" + host + sse_url + "?token=" + access_token
         # 解析url
@@ -240,7 +242,8 @@ class TestParseSSE:
         file = GetContent(configfile)
         config = file.config()
         host = config["server"]["host"]
-        token = GetToken(host=host).get_token(host, "A0", "111111")
+        user_password = config.get("user", "default_password", fallback="111111")
+        token = GetToken(host=host).get_token(host, "A0", user_password)
         access_token = token[1]
         stream_url = "http://" + host + stream_url + "?token=" + access_token
         # 解析url

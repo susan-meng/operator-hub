@@ -28,6 +28,7 @@ def debug_role_member():
     file = GetContent(configfile)
     config = file.config()
     host = config["server"]["host"]
+    admin_password = config["admin"]["admin_password"]
     print(f"\n1. 配置信息:")
     print(f"   Host: {host}")
     
@@ -57,7 +58,7 @@ def debug_role_member():
     # 3. 获取管理员 token
     print(f"\n3. 获取管理员 token:")
     try:
-        token = GetToken(host=host).get_token(host, "admin", "eisoo.com123")
+        token = GetToken(host=host).get_token(host, "admin", admin_password)
         admin_token = token[1]
         admin_user_id = token[0]
         print(f"   管理员用户 ID: {admin_user_id}")
@@ -142,8 +143,9 @@ def cleanup_user():
         file = GetContent(configfile)
         config = file.config()
         host = config["server"]["host"]
+        admin_password = config["admin"]["admin_password"]
         
-        token = GetToken(host=host).get_token(host, "admin", "eisoo.com123")
+        token = GetToken(host=host).get_token(host, "admin", admin_password)
         admin_token = token[1]
         
         client = DeleteUser(host=host)

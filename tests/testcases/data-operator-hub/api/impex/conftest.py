@@ -358,12 +358,13 @@ def PrepareData(Headers, UserHeaders, PermPrepare):
     file = GetContent(configfile)
     config = file.config()
     host = config["server"]["host"]
-    t1_token = GetToken(host=host).get_token(host, "t1", "111111")
+    user_password = config.get("user", "default_password", fallback="111111")
+    t1_token = GetToken(host=host).get_token(host, "t1", user_password)
     t1_headers = {
         "Authorization": f"Bearer {t1_token[1]}"
     }
     
-    t2_token = GetToken(host=host).get_token(host, "t2", "111111")
+    t2_token = GetToken(host=host).get_token(host, "t2", user_password)
     t2_headers = {
         "Authorization": f"Bearer {t2_token[1]}"
     }

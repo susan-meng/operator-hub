@@ -330,7 +330,22 @@ OQE5VFOIXPVTaa25mQIDAQAB
         return data['user_id'], applyToken_code["access_token"]
 
 if __name__ == '__main__':
-    client = GetToken("10.4.110.62")
+    import os
+    from common.get_content import GetContent
+    
+    # Read config from file
+    configfile = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config/env.ini")
+    if os.path.exists(configfile):
+        file = GetContent(configfile)
+        config = file.config()
+        host = config.get("server", "host", fallback="10.4.110.62")
+        user_password = config.get("user", "default_password", fallback="111111")
+    else:
+        host = "10.4.110.62"
+        user_password = "111111"
+        print("警告: 配置文件不存在，使用默认值")
+    
+    client = GetToken(host)
     # mod = client.modifyAdminPwd("eisoo.com123", "eisoo.com")
-    result = client.get_token("10.4.110.62", "A0", "111111")
+    result = client.get_token(host, "A0", user_password)
     print(result)

@@ -133,7 +133,7 @@ def SetPerm(DomainPrepare):
     # 注意：设置权限需要使用管理员权限，不能使用普通用户的 Headers
     user_list = DomainPrepare[0]
     # 获取管理员 token
-    token = GetToken(host=host).get_token(host, "admin", "eisoo.com123")
+    token = GetToken(host=host).get_token(host, "admin", admin_password)
     admin_token = token[1]
     admin_headers = {
         "Authorization": f"Bearer {admin_token}",
@@ -186,8 +186,9 @@ def TestDomainData(DomainPrepare, RoleMember):
         # 不抛出异常，让测试继续执行，看看是否真的会失败
     domain_list = DomainPrepare[1]
     token_list = []
+    user_password = config.get("user", "default_password", fallback="111111")
     for user in ["A0", "a1", "b1"]:
-        token = GetToken(host=host).get_token(host, user, "111111")
+        token = GetToken(host=host).get_token(host, user, user_password)
         token_list.append(token[1])
     pub_domain_headers = {
         "Authorization": f"Bearer {token_list[0]}",

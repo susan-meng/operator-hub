@@ -21,6 +21,11 @@ config = file.config()
 
 host = config["server"]["host"]
 admin_password = config["admin"]["admin_password"]
+# Get user password from config, fallback to "111111" if section or option doesn't exist
+if config.has_section("user"):
+    user_password = config.get("user", "default_password", fallback="111111")
+else:
+    user_password = "111111"
 
 @pytest.fixture(scope="session", autouse=True)
 def APrepare():
@@ -75,7 +80,7 @@ def APrepare():
 @pytest.fixture(scope="session", autouse=True)
 def Headers():
     '''获取token授权，外部接口授权'''
-    token = GetToken(host=host).get_token(host, "A0", "111111")
+    token = GetToken(host=host).get_token(host, "A0", user_password)
     headers = {
         "Authorization": f"Bearer {token[1]}",
         "x-business-domain": "bd_public"
@@ -87,7 +92,7 @@ def Headers():
 @pytest.fixture(scope="session", autouse=True)
 def UserHeaders():
     '''获取token授权，内部接口授权'''
-    token = GetToken(host=host).get_token(host, "A0", "111111")
+    token = GetToken(host=host).get_token(host, "A0", user_password)
     headers = {
         "x-account-id": token[0],
         "x-account-type": "user",

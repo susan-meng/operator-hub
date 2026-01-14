@@ -20,6 +20,7 @@ db_port = config["server"]["db_port"]
 db_user = config["server"]["db_user"]
 db_pwd = config["server"]["db_pwd"]
 admin_password = config["admin"]["admin_password"]
+user_password = config.get("user", "default_password", fallback="111111")
 
 @pytest.fixture(scope="session", autouse=True)
 def delete_operator_data():

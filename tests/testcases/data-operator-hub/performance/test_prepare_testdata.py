@@ -35,7 +35,8 @@ def prepare_testdata():
         file = GetContent(configfile)
         config = file.config()
         host = config["server"]["host"]
-        token = GetToken(host=host).get_token(host, str(i), "111111")
+        user_password = config.get("user", "default_password", fallback="111111")
+        token = GetToken(host=host).get_token(host, str(i), user_password)
         headers = {
             "Authorization": f"Bearer {token[1]}"
         }

@@ -30,22 +30,23 @@ class TestOperatorPerm:
         file = GetContent(configfile)
         config = file.config()
         host = config["server"]["host"]
-        a_token = GetToken(host=host).get_token(host, "a", "111111")
+        user_password = config.get("user", "default_password", fallback="111111")
+        a_token = GetToken(host=host).get_token(host, "a", user_password)
         TestOperatorPerm.a_headers = {
             "Authorization": f"Bearer {a_token[1]}"
         }
         
-        b_token = GetToken(host=host).get_token(host, "b", "111111")
+        b_token = GetToken(host=host).get_token(host, "b", user_password)
         TestOperatorPerm.b_headers = {
             "Authorization": f"Bearer {b_token[1]}"
         }
 
-        c_token = GetToken(host=host).get_token(host, "c", "111111")
+        c_token = GetToken(host=host).get_token(host, "c", user_password)
         TestOperatorPerm.c_headers = {
             "Authorization": f"Bearer {c_token[1]}"
         }
 
-        d_token = GetToken(host=host).get_token(host, "d", "111111")
+        d_token = GetToken(host=host).get_token(host, "d", user_password)
         TestOperatorPerm.d_headers = {
             "Authorization": f"Bearer {d_token[1]}"
         }

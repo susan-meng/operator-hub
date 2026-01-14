@@ -19,11 +19,16 @@ class CreateUser:
         self.sharemgnt_ip = "sharemgnt.anyshare.svc.cluster.local"
         self.host = host
 
-        # Read admin password from config file
+        # Read admin password and user password from config file
         configfile = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config/env.ini")
         file = GetContent(configfile)
         config = file.config()
         admin_password = config["admin"]["admin_password"]
+        # Get user password from config, fallback to "111111" if section or option doesn't exist
+        if config.has_section("user"):
+            self.user_password = config.get("user", "default_password", fallback="111111")
+        else:
+            self.user_password = "111111"
 
         client = GetToken(self.host)
         result = client.get_token(self.host, "admin", admin_password)
@@ -104,7 +109,7 @@ class CreateUser:
                                                 departmentIds=departmentIds,
                                                 space=50 * 1024 * 1024 * 1024,
                                                 pwdControl=False)
-            addUserInfo = ncTUsrmAddUserInfo(user=userInfo, password='111111')
+            addUserInfo = ncTUsrmAddUserInfo(user=userInfo, password=self.user_password)
             storage_location = {'type': 'unspecified'}
             # import pdb;pdb.set_trace()
             try:
