@@ -8,13 +8,13 @@ import (
 	"fmt"
 	"net/http"
 
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces/model"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metric"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 )
 
 // ConvertOperatorToTool 算子转换成工具
@@ -138,14 +138,14 @@ func (s *ToolServiceImpl) checkBoxToolSame(ctx context.Context, boxID, name, met
 			return
 		}
 		var toolInfo *interfaces.ToolInfo
-		toolInfo, err = s.getToolInfo(ctx, tool, "")
+		toolInfo, err = s.getToolInfo(ctx, tool, "", "")
 		if err != nil {
 			return
 		}
 		if toolInfo.Metadata == nil {
 			err = fmt.Errorf("tool %s metadata is nil", tool.Name)
-			s.Logger.WithContext(ctx).Errorf("parse metadata failed, err: %v", err)
-			err = errors.DefaultHTTPError(ctx, http.StatusInternalServerError, err.Error())
+			s.Logger.WithContext(ctx).Warnf("parse metadata failed, err: %v", err)
+			continue
 		}
 		val := validatorMethodPath(toolInfo.Metadata.Method, toolInfo.Metadata.Path)
 		if val == validatorMethodPath(method, path) {

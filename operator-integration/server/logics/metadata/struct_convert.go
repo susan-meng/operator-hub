@@ -41,6 +41,21 @@ func MetadataDBToStruct(metadataDB interfaces.IMetadataDB) *interfaces.MetadataI
 	}
 }
 
+// DefaultMetadataInfo 获取默认元数据信息
+func DefaultMetadataInfo(metadataType interfaces.MetadataType) *interfaces.MetadataInfo {
+	metadataInfo := &interfaces.MetadataInfo{}
+	switch metadataType {
+	case interfaces.MetadataTypeAPI:
+		metadataInfo.APISpec = &interfaces.APISpec{}
+		return metadataInfo
+	case interfaces.MetadataTypeFunc:
+		metadataInfo.FunctionContent = &interfaces.FunctionContent{}
+		return metadataInfo
+	default:
+		return nil
+	}
+}
+
 // apimetadataDBToAPIMetadata 将数据库模型转换为 API 元数据接口
 func apimetadataDBToAPIMetadata(metadataDB *model.APIMetadataDB) *interfaces.MetadataInfo {
 	apiSpec := &interfaces.APISpec{}

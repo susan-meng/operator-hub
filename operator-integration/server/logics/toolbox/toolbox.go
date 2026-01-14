@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	infracommon "github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/telemetry"
@@ -16,7 +17,6 @@ import (
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/common"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metadata"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metric"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
 )
@@ -73,7 +73,7 @@ func (s *ToolServiceImpl) GetToolBox(ctx context.Context, req *interfaces.GetToo
 		err = errors.DefaultHTTPError(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
-	toolInfos, userMap, err := s.batchGetToolInfoAndUserInfo(ctx, tools, userIDs, toolBox.ServerURL)
+	toolInfos, userMap, err := s.batchGetToolInfoAndUserInfo(ctx, tools, userIDs, toolBox.ServerURL, interfaces.MetadataType(toolBox.MetadataType))
 	if err != nil {
 		return
 	}
@@ -343,7 +343,7 @@ func (s *ToolServiceImpl) GetBoxTool(ctx context.Context, req *interfaces.GetToo
 			fmt.Sprintf("tool %s not found", req.ToolID))
 		return
 	}
-	resp, err = s.getToolInfo(ctx, tool, boxDB.ServerURL)
+	resp, err = s.getToolInfo(ctx, tool, boxDB.ServerURL, interfaces.MetadataType(boxDB.MetadataType))
 	return
 }
 
@@ -532,7 +532,7 @@ func (s *ToolServiceImpl) QueryToolList(ctx context.Context, req *interfaces.Que
 	}
 	// 收集工具相关信息
 	userIDs := []string{}
-	toolInfos, _, err := s.batchGetToolInfoAndUserInfo(ctx, tools, userIDs, boxDB.ServerURL)
+	toolInfos, _, err := s.batchGetToolInfoAndUserInfo(ctx, tools, userIDs, boxDB.ServerURL, interfaces.MetadataType(boxDB.MetadataType))
 	if err != nil {
 		return
 	}
@@ -647,12 +647,12 @@ func (s *ToolServiceImpl) UpdateToolStatus(ctx context.Context, req *interfaces.
 }
 
 // getToolInfo 获取工具信息
-func (s *ToolServiceImpl) getToolInfo(ctx context.Context, tool *model.ToolDB, boxSvcURL string) (toolInfo *interfaces.ToolInfo, err error) {
+func (s *ToolServiceImpl) getToolInfo(ctx context.Context, tool *model.ToolDB, boxSvcURL string, boxMetadataType interfaces.MetadataType) (toolInfo *interfaces.ToolInfo, err error) {
 	toolInfo, err = s.toolDBToToolInfo(ctx, tool)
 	if err != nil {
 		return
 	}
-	// 获取元数据
+	// 获取元数据p
 	has, metadataDB, err := s.MetadataService.GetMetadataBySource(ctx, tool.SourceID, tool.SourceType)
 	if err != nil {
 		s.Logger.WithContext(ctx).Errorf("get metadata failed, err: %v", err)
@@ -660,8 +660,9 @@ func (s *ToolServiceImpl) getToolInfo(ctx context.Context, tool *model.ToolDB, b
 		return
 	}
 	if !has {
-		err = errors.NewHTTPError(ctx, http.StatusBadRequest, errors.ErrExtMetadataNotFound,
-			fmt.Sprintf("metadata type: %s id: %s not found", tool.SourceType, tool.SourceID))
+		s.Logger.WithContext(ctx).Errorf("metadata type: %s source_id: %s not found", tool.SourceType, tool.SourceID)
+		toolInfo.MetadataType = boxMetadataType
+		toolInfo.Metadata = metadata.DefaultMetadataInfo(boxMetadataType)
 		return
 	}
 	// 若为OpenAPI类型，ServerURL和工具箱配置的boxSvcURL保持一致
@@ -674,7 +675,7 @@ func (s *ToolServiceImpl) getToolInfo(ctx context.Context, tool *model.ToolDB, b
 
 // batchGetToolInfoAndUserInfo 批量获取工具及用户信息
 func (s *ToolServiceImpl) batchGetToolInfoAndUserInfo(ctx context.Context, tools []*model.ToolDB, userIDs []string,
-	boxSvcURL string) (toolInfos []*interfaces.ToolInfo, userMap map[string]string, err error) {
+	boxSvcURL string, boxMetadataType interfaces.MetadataType) (toolInfos []*interfaces.ToolInfo, userMap map[string]string, err error) {
 	toolInfos = []*interfaces.ToolInfo{}
 	sourceMap := map[model.SourceType][]string{}
 	toolIDSourceMap := map[string]string{}
@@ -702,17 +703,18 @@ func (s *ToolServiceImpl) batchGetToolInfoAndUserInfo(ctx context.Context, tools
 	}
 	// 填充元数据信息
 	for _, toolInfo := range toolInfos {
+		toolInfo.CreateUser = userMap[toolInfo.CreateUser]
+		toolInfo.UpdateUser = userMap[toolInfo.UpdateUser]
 		metadataDB, ok := sourceIDToMetadataMap[toolIDSourceMap[toolInfo.ToolID]]
 		if !ok {
 			s.Logger.WithContext(ctx).Errorf("metadata not found, toolID: %s", toolInfo.ToolID)
-			err = errors.DefaultHTTPError(ctx, http.StatusInternalServerError, "metadata not found")
-			return
+			toolInfo.MetadataType = boxMetadataType
+			toolInfo.Metadata = metadata.DefaultMetadataInfo(boxMetadataType)
+			continue
 		}
 		metadataDB.SetServerURL(boxSvcURL)
 		toolInfo.MetadataType = interfaces.MetadataType(metadataDB.GetType())
 		toolInfo.Metadata = metadata.MetadataDBToStruct(metadataDB)
-		toolInfo.CreateUser = userMap[toolInfo.CreateUser]
-		toolInfo.UpdateUser = userMap[toolInfo.UpdateUser]
 	}
 	return
 }

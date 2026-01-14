@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	infracommon "github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common/ormhelper"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
@@ -14,7 +15,6 @@ import (
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/auth"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metadata"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 )
 
 // 排序字段与数据库字段映射
@@ -184,8 +184,10 @@ func (s *ToolServiceImpl) GetMarketToolList(ctx context.Context, req *interfaces
 			metadataDB, ok := sourceIDToMetadataMap[toolIDSourceMap[toolInfo.ToolID]]
 			if !ok {
 				s.Logger.WithContext(ctx).Errorf("metadata not found, toolID: %s", toolInfo.ToolID)
-				err = errors.DefaultHTTPError(ctx, http.StatusInternalServerError, "metadata not found")
-				return
+				// 初始化Metadata
+				toolInfo.MetadataType = interfaces.MetadataType(toolBox.MetadataType)
+				toolInfo.Metadata = metadata.DefaultMetadataInfo(toolInfo.MetadataType)
+				continue
 			}
 			// 若为OpenAPI类型，ServerURL和工具箱配置的boxSvcURL保持一致
 			metadataDB.SetServerURL(toolBox.BoxSvcURL)
@@ -323,7 +325,7 @@ func (s *ToolServiceImpl) getToolBoxAllToolInfo(ctx context.Context, boxDB *mode
 		err = errors.DefaultHTTPError(ctx, http.StatusInternalServerError, "select tool list error")
 		return
 	}
-	toolInfos, _, err = s.batchGetToolInfoAndUserInfo(ctx, toolDBs, []string{}, boxDB.ServerURL)
+	toolInfos, _, err = s.batchGetToolInfoAndUserInfo(ctx, toolDBs, []string{}, boxDB.ServerURL, interfaces.MetadataType(boxDB.MetadataType))
 	return
 }
 

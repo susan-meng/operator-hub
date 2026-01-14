@@ -610,6 +610,7 @@ func (s *ToolServiceImpl) batchGetToolBoxInfo(ctx context.Context, boxDBs []*mod
 		case model.SourceTypeFunction:
 			sourceMap[model.SourceTypeFunction] = append(sourceMap[model.SourceTypeFunction], toolDB.SourceID)
 		case model.SourceTypeOperator:
+			sourceMap[model.SourceTypeOperator] = append(sourceMap[model.SourceTypeOperator], toolDB.SourceID)
 			depOperatorIDs = append(depOperatorIDs, toolDB.SourceID)
 		}
 		toolsMap[toolDB.BoxID] = append(toolsMap[toolDB.BoxID], toolImpexItem)
