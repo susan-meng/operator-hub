@@ -43,6 +43,7 @@ const IDEWorkspace = ({ action, operatorType }: IDEWorkspaceProps) => {
   const editingAreaRef = useRef<{ validate: () => Promise<boolean>; validateInputsOnly: () => boolean }>(null);
   const hasChangedRef = useRef<boolean>(false); // 是否已有改动
   const willGoBackRef = useRef<boolean>(false); // 是否会返回
+  const codeRef = useRef<string>(''); // 代码
 
   const [panelVisible, setPanelVisible] = useState<{ debugPanel: boolean; consolePanel: boolean }>({
     debugPanel: true,
@@ -58,6 +59,10 @@ const IDEWorkspace = ({ action, operatorType }: IDEWorkspaceProps) => {
   const [consolePanelSize, setConsolePanelSize] = useState<number>(200); // 控制台面板的高度(因为一开始控制台面板不显示，导致defaultSize: 200 不生效，所以用受控状态来控制高度)
   const [hasChanged, setHasChanged] = useState<boolean>(false); // 是否已有改动
   const [saveLoading, setSaveLoading] = useState<boolean>(false); // 保存按钮的加载状态
+
+  useEffect(() => {
+    codeRef.current = detail.code || '';
+  }, [detail.code]);
 
   useEffect(() => {
     // 隐藏侧边栏
@@ -144,7 +149,7 @@ const IDEWorkspace = ({ action, operatorType }: IDEWorkspaceProps) => {
           description: detail.description,
           inputs: detail.inputs,
           outputs: detail.outputs,
-          code: detail.code,
+          code: codeRef.current,
           script_type: detail.script_type,
         },
       });
@@ -169,7 +174,16 @@ const IDEWorkspace = ({ action, operatorType }: IDEWorkspaceProps) => {
       }
       finallyCallback();
     },
-    [toolboxId, detail, navigate]
+    [
+      toolboxId,
+      detail.name,
+      detail.description,
+      detail.use_rule,
+      detail.inputs,
+      detail.outputs,
+      detail.script_type,
+      navigate,
+    ]
   );
 
   // 编辑工具
@@ -183,7 +197,7 @@ const IDEWorkspace = ({ action, operatorType }: IDEWorkspaceProps) => {
         function_input: {
           inputs: detail.inputs,
           outputs: detail.outputs,
-          code: detail.code,
+          code: codeRef.current,
           script_type: detail.script_type,
         },
       });
@@ -192,7 +206,16 @@ const IDEWorkspace = ({ action, operatorType }: IDEWorkspaceProps) => {
       successCallback();
       finallyCallback();
     },
-    [toolboxId, toolId, detail]
+    [
+      toolboxId,
+      toolId,
+      detail.name,
+      detail.description,
+      detail.use_rule,
+      detail.inputs,
+      detail.outputs,
+      detail.script_type,
+    ]
   );
 
   // 获取算子详情
@@ -239,7 +262,7 @@ const IDEWorkspace = ({ action, operatorType }: IDEWorkspaceProps) => {
           description: detail.description,
           inputs: detail.inputs,
           outputs: detail.outputs,
-          code: detail.code,
+          code: codeRef.current,
           script_type: detail.script_type,
         },
         operator_info: {
@@ -272,7 +295,17 @@ const IDEWorkspace = ({ action, operatorType }: IDEWorkspaceProps) => {
       }
       finallyCallback();
     },
-    [detail, navigate, location.state]
+    [
+      detail.name,
+      detail.description,
+      detail.inputs,
+      detail.outputs,
+      detail.script_type,
+      detail.operator_execute_control?.timeout,
+      detail.operator_info?.is_data_source,
+      navigate,
+      location.state,
+    ]
   );
 
   // 编辑算子
@@ -286,7 +319,7 @@ const IDEWorkspace = ({ action, operatorType }: IDEWorkspaceProps) => {
         function_input: {
           inputs: detail.inputs,
           outputs: detail.outputs,
-          code: detail.code,
+          code: codeRef.current,
           script_type: detail.script_type,
         },
         operator_info: {
@@ -302,7 +335,16 @@ const IDEWorkspace = ({ action, operatorType }: IDEWorkspaceProps) => {
       successCallback();
       finallyCallback();
     },
-    [detail, operatorId]
+    [
+      detail.name,
+      detail.description,
+      detail.inputs,
+      detail.outputs,
+      detail.script_type,
+      detail.operator_info?.is_data_source,
+      detail.operator_execute_control?.timeout,
+      operatorId,
+    ]
   );
 
   // 校验输入参数的合法性
@@ -318,7 +360,7 @@ const IDEWorkspace = ({ action, operatorType }: IDEWorkspaceProps) => {
 
   // 保存
   const handleSave = useCallback(async () => {
-    if (!detail.code?.trim()) {
+    if (!codeRef.current?.trim()) {
       message.info('代码块内容不能为空');
       return;
     }

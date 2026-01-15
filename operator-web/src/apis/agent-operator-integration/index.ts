@@ -5,6 +5,8 @@ import type {
   ToolListParams,
   FunctionExecuteRequest,
   FunctionExecuteResponse,
+  PostAIGenCodeRequest,
+  PostAIGenCodeResponse,
 } from './type';
 
 const apis = {
@@ -256,4 +258,9 @@ export function postFunctionExecute(data: FunctionExecuteRequest): Promise<Funct
 // 获取工具详情
 export function getToolDetail(box_id: string, tool_id: string) {
   return get(`${apis.toolBox}/${box_id}/tool/${tool_id}`);
+}
+
+// AI 生成
+export function postAIGenCode({ type, ...body }: PostAIGenCodeRequest): Promise<PostAIGenCodeResponse> {
+  return post(`${apis.toolBoxIntegrationBaseUrl}/ai_generate/function/${type}`, { body });
 }
