@@ -1481,6 +1481,45 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /v1/ai_generate/prompt/:type:
+    get:
+      summary: "获取提示词模板"
+      description: "获取指定类型的提示词模板"
+      tags:
+        - 函数
+      parameters:
+        - name: "Authorization"
+          in: "header"
+          required: true
+          description: "认证信息"
+          schema:
+            type: string
+            example: "Bearer token"
+        - name: "type"
+          in: "path"
+          required: true
+          description: "提示词模板类型"
+          schema:
+            type: string
+            default: "python_function_generator"
+            example: "python_function_generator"
+            enum:
+              - "python_function_generator"
+              - "metadata_param_generator"
+      responses:
+        "200":
+          description: "获取提示词模板成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PromptTemplate"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
 components:
   schemas:
     Error:
@@ -2661,3 +2700,16 @@ components:
           type: object
           description: 事件内容
           $ref: "#/components/schemas/FunctionAIGenerateEvent"
+    PromptTemplate:
+      type: object
+      description: "提示词模板"
+      properties:
+        id:
+          type: string
+          description: "提示词模板ID"
+        type:
+          type: string
+          description: "提示词模板类型"
+        content:
+          type: string
+          description: "提示词模板内容"

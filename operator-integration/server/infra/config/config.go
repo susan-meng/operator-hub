@@ -49,18 +49,27 @@ type Config struct {
 	BusinessDomainManagement PrivateBaseConfig   `yaml:"business-system-service"`
 	SandboxRuntime           PrivateBaseConfig   `yaml:"sandbox-runtime"`
 	MFModelAPI               PrivateBaseConfig   `yaml:"mf-model-api"`
-	LLMConfig                LLMConfig           `yaml:"llm"`
+	MFModelManager           PrivateBaseConfig   `yaml:"mf-model-manager"`
+	AIGenerationConfig       AIGenerationConfig  `yaml:"ai_generation_config"`
+}
+
+// AIGenerationConfig 智能生成配置
+type AIGenerationConfig struct {
+	// python代码生成系统提示词ID
+	PythonFunctionGeneratorPromptID string    `yaml:"python_function_generator_prompt_id"` // 如果为空或为找到，则使用默认提示词
+	MetadataParamGeneratorPromptID  string    `yaml:"metadata_param_generator_prompt_id"`  // 如果为空或为找到，则使用默认提示词
+	LLMConfig                       LLMConfig `yaml:"llm"`
 }
 
 // LLMConfig LLM配置
 type LLMConfig struct {
 	Model            string  `yaml:"model"`
-	MaxTokens        int     `yaml:"max_tokens" default:"1024"`
+	MaxTokens        int     `yaml:"max_tokens" default:"2048"`
 	Temperature      float64 `yaml:"temperature" default:"0.1"`
-	TopK             int     `yaml:"top_k" default:"20"`
-	TopP             float64 `yaml:"top_p" default:"0.1"`
-	FrequencyPenalty float64 `yaml:"frequency_penalty" default:"0.1"`
-	PresencePenalty  float64 `yaml:"presence_penalty" default:"0.1"`
+	TopK             int     `yaml:"top_k" default:"40"`
+	TopP             float64 `yaml:"top_p" default:"0.9"`
+	FrequencyPenalty float64 `yaml:"frequency_penalty" default:"0.0"`
+	PresencePenalty  float64 `yaml:"presence_penalty" default:"0.0"`
 }
 
 // ObservabilityConfig 跟踪配置

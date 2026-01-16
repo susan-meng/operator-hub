@@ -20,6 +20,8 @@ import (
 // AIGenerationHandler AI生成处理接口
 type AIGenerationHandler interface {
 	FunctionAIGeneration(c *gin.Context)
+	// GetPromptTemplate 获取指定类型的提示词模板
+	GetPromptTemplate(c *gin.Context)
 }
 
 type aiGenerationHandler struct {
@@ -163,4 +165,24 @@ func isEndMarker(line string) bool {
 		}
 	}
 	return false
+}
+
+// GetPromptTemplate 获取指定类型的提示词模板
+func (h *aiGenerationHandler) GetPromptTemplate(c *gin.Context) {
+	req := &interfaces.GetPromptTemplateReq{}
+	if err := c.ShouldBindUri(req); err != nil {
+		rest.ReplyError(c, err)
+		return
+	}
+	err := h.Validator.ValidatorStruct(c.Request.Context(), req)
+	if err != nil {
+		rest.ReplyError(c, err)
+		return
+	}
+	promptTemplate, err := h.aiGenerationService.GetPromptTemplate(c.Request.Context(), req.Type)
+	if err != nil {
+		rest.ReplyError(c, err)
+		return
+	}
+	rest.ReplyOK(c, http.StatusOK, promptTemplate)
 }

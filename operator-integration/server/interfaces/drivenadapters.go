@@ -645,3 +645,18 @@ type MFModelAPIClient interface {
 	// 调用模型流式返回
 	StreamChatCompletion(ctx context.Context, req *ChatCompletionReq) (chan string, chan error, error)
 }
+
+// GetPromptResp 获取提示词响应
+type GetPromptResp struct {
+	PromptID   string `json:"prompt_id"`   // 提示词ID
+	PromptName string `json:"prompt_name"` // 提示词名称
+	ModelID    string `json:"model_id"`    // 模型ID
+	ModelName  string `json:"model_name"`  // 模型名称
+	Messages   string `json:"messages"`    // 提示词内容
+}
+
+// MFModelManager 模型管理接口
+type MFModelManager interface {
+	// 获取提示词
+	GetPromptByPromptID(ctx context.Context, promptID string) (resp *GetPromptResp, err error)
+}

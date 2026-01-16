@@ -10,6 +10,7 @@ import (
 
 // PromptTemplate 提示词模板结构
 type PromptTemplate struct {
+	PromptID           string `json:"prompt_id"`
 	Name               string `json:"name" validate:"required"`
 	Description        string `json:"description" validate:"required"`
 	SystemPrompt       string `json:"system_prompt" validate:"required"`
@@ -76,4 +77,11 @@ type AIGenerationService interface {
 	FunctionAIGenerate(ctx context.Context, req *FunctionAIGenerateReq) (*FunctionAIGeneratResp, error)
 	// FunctionAIGenerateStream 函数智能生成流式返回
 	FunctionAIGenerateStream(ctx context.Context, req *FunctionAIGenerateReq) (respChan chan string, errChan chan error, err error)
+	// GetPromptTemplate 获取指定类型的提示词模板
+	GetPromptTemplate(ctx context.Context, tempType PromptTemplateType) (*PromptTemplate, error)
+}
+
+// GetPromptTemplateReq 获取提示词模板请求
+type GetPromptTemplateReq struct {
+	Type PromptTemplateType `uri:"type" validate:"required,oneof=python_function_generator metadata_param_generator"` // 提示词模板类型，必填
 }

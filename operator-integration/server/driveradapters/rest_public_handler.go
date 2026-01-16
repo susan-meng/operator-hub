@@ -58,4 +58,6 @@ func (r *restPublicHandler) RegisterRouter(engine *gin.RouterGroup) {
 	engine.GET("/template/:template_type", middlewareBusinessDomain(true, false), r.TemplateHandler.GetTemplate)
 	// AI辅助生成
 	engine.POST("/ai_generate/function/:type", middlewareBusinessDomain(true, false), r.AIGenerationHandler.FunctionAIGeneration)
+	// 获取提示词模板
+	engine.GET("/ai_generate/prompt/:type", middlewareBusinessDomain(true, false), r.AIGenerationHandler.GetPromptTemplate)
 }

@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/gin-gonic/gin"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/driveradapters"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/config"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/telemetry"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	logicscommon "github.com/kweaver-ai/operator-hub/operator-integration/server/logics/common"
-	"github.com/gin-gonic/gin"
 )
 
 // Server 服务
