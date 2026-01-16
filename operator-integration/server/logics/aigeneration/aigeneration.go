@@ -42,7 +42,7 @@ func NewAIGenerationService() interfaces.AIGenerationService {
 		agInstance = &aiGenerationService{
 			Logger:           conf.GetLogger(),
 			MFModelAPIClient: drivenadapters.NewMFModelAPIClient(),
-			LLMConfig:        conf.LLMConfig,
+			LLMConfig:        conf.AIGenerationConfig.LLMConfig,
 			PromptLoader:     promptLoader,
 		}
 	})
@@ -50,7 +50,7 @@ func NewAIGenerationService() interfaces.AIGenerationService {
 }
 
 func (ag *aiGenerationService) generateChatCompletionParams(ctx context.Context, req *interfaces.FunctionAIGenerateReq) (*interfaces.ChatCompletionReq, error) {
-	promptTemplate, err := ag.PromptLoader.GetTemplate(req.Type)
+	promptTemplate, err := ag.PromptLoader.GetTemplate(ctx, req.Type)
 	if err != nil {
 		ag.Logger.WithContext(ctx).Errorf("failed to get prompt template: %v", err)
 		err = errors.DefaultHTTPError(ctx, http.StatusBadRequest, err.Error())
@@ -134,4 +134,9 @@ func (ag *aiGenerationService) FunctionAIGenerateStream(ctx context.Context, req
 		return nil, nil, err
 	}
 	return respChan, errChan, nil
+}
+
+// 获取当前提示词模板
+func (ag *aiGenerationService) GetPromptTemplate(ctx context.Context, tempType interfaces.PromptTemplateType) (*interfaces.PromptTemplate, error) {
+	return ag.PromptLoader.GetTemplate(ctx, tempType)
 }

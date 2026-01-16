@@ -77,14 +77,21 @@ data:
       private_protocol: {{ index .Values "depServices" "mf-model-api" "privateProtocol" | quote }}
       private_host: {{ index .Values "depServices" "mf-model-api" "privateHost" | quote }}
       private_port: {{ index .Values "depServices" "mf-model-api" "privatePort" }}
-    llm:
-      model: {{ .Values.depServices.llm.model | quote }}
-      max_tokens: {{ .Values.depServices.llm.maxTokens }}
-      temperature: {{ .Values.depServices.llm.temperature }}
-      top_k: {{ .Values.depServices.llm.topK }}
-      top_p: {{ .Values.depServices.llm.topP }}
-      frequency_penalty: {{ .Values.depServices.llm.frequencyPenalty }}
-      presence_penalty: {{ .Values.depServices.llm.presencePenalty }}
+    mf-model-manager:
+      private_protocol: {{ index .Values "depServices" "mf-model-manager" "privateProtocol" | quote }}
+      private_host: {{ index .Values "depServices" "mf-model-manager" "privateHost" | quote }}
+      private_port: {{ index .Values "depServices" "mf-model-manager" "privatePort" }}
+    ai_generation_config:
+      python_function_generator_prompt_id: {{ .Values.depServices.aiGenerationConfig.pythonFunctionGeneratorPromptID | quote }}
+      metadata_param_generator_prompt_id: {{ .Values.depServices.aiGenerationConfig.metadataParamGeneratorPromptID | quote }}
+      llm:
+        model: {{ .Values.depServices.aiGenerationConfig.llm.model | quote }}
+        max_tokens: {{ .Values.depServices.aiGenerationConfig.llm.maxTokens }}
+        temperature: {{ .Values.depServices.aiGenerationConfig.llm.temperature }}
+        top_k: {{ .Values.depServices.aiGenerationConfig.llm.topK }}
+        top_p: {{ .Values.depServices.aiGenerationConfig.llm.topP }}
+        frequency_penalty: {{ .Values.depServices.aiGenerationConfig.llm.frequencyPenalty }}
+        presence_penalty: {{ .Values.depServices.aiGenerationConfig.llm.presencePenalty }}
 
   mq_config.yaml: |
     {{- toYaml .Values.depServices.mq | nindent 4 }}
