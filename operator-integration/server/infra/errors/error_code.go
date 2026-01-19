@@ -182,6 +182,8 @@ const (
 	ErrExtBusinessDomainIDRequired ErrorCode = "BusinessDomainIDRequired" // 请求头中缺少业务域ID，请确保在请求中包含 x-business-domain 头部参数
 	// BusinessDomainForbidden 业务域权限不足
 	ErrExtBusinessDomainForbidden ErrorCode = "BusinessDomainForbidden" // 您没有权限访问该业务域，请联系管理员获取权限
+	// BusinessDomainResourceConflict 资源已关联到业务域
+	ErrExtBusinessDomainResourceConflict ErrorCode = "BusinessDomainResourceConflict" // 该资源已关联到业务域，无需重复关联
 )
 
 // 依赖服务 错误码定义

@@ -10,12 +10,12 @@ import (
 	"net/url"
 	"sync"
 
+	jsoniter "github.com/json-iterator/go"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/config"
 	infraErr "github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/rest"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
-	jsoniter "github.com/json-iterator/go"
 )
 
 var (
@@ -50,9 +50,18 @@ func (b *businessDomainManagementClient) AssociateResource(ctx context.Context, 
 	header := map[string]string{}
 
 	respCode, _, err := b.httpClient.Post(ctx, src, header, req)
+
+	// 处理 403 权限不足
 	if respCode == http.StatusForbidden {
 		b.logger.Errorf("businessDomainManagementClient#AssociateResource failed:%v, url:%v", err, src)
 		err = infraErr.NewHTTPError(ctx, http.StatusForbidden, infraErr.ErrExtBusinessDomainForbidden, err.Error())
+		return err
+	}
+
+	// 处理 409 资源已关联冲突
+	if respCode == http.StatusConflict {
+		b.logger.Warnf("businessDomainManagementClient#AssociateResource conflict: resource already connected, resource_id:%s, domain_id:%s", req.ID, req.BDID)
+		err = infraErr.NewHTTPError(ctx, http.StatusConflict, infraErr.ErrExtBusinessDomainResourceConflict, err.Error())
 		return err
 	}
 
