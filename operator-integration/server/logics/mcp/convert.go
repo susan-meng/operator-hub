@@ -90,17 +90,17 @@ func (c *SimpleConverter) convertSimpleOpenAPI(simple *SimpleOpenAPI) *Result {
 	// 构建properties
 	properties := map[string]any{}
 
-	headers := c.extractParameters(simple.Parameters, "header")
+	headers := c.extractParameters(simple.Parameters, "header", "HTTP 请求头参数")
 	if headers != nil {
 		properties["header"] = headers
 	}
 
-	query := c.extractParameters(simple.Parameters, "query")
+	query := c.extractParameters(simple.Parameters, "query", "URL 查询字符串参数")
 	if query != nil {
 		properties["query"] = query
 	}
 
-	path := c.extractParameters(simple.Parameters, "path")
+	path := c.extractParameters(simple.Parameters, "path", "URL 路径参数")
 	if path != nil {
 		properties["path"] = path
 	}
@@ -134,7 +134,9 @@ func (c *SimpleConverter) convertSimpleOpenAPI(simple *SimpleOpenAPI) *Result {
 }
 
 // extractParameters 提取指定类型的参数
-func (c *SimpleConverter) extractParameters(params []Parameter, inType string) map[string]any {
+// inType: 参数类型 (header/query/path)
+// description: 该类型参数组的描述
+func (c *SimpleConverter) extractParameters(params []Parameter, inType, description string) map[string]any {
 	props := map[string]any{}
 	required := []string{}
 
@@ -156,8 +158,9 @@ func (c *SimpleConverter) extractParameters(params []Parameter, inType string) m
 	}
 
 	obj := map[string]any{
-		"type":       "object",
-		"properties": props,
+		"type":        "object",
+		"description": description,
+		"properties":  props,
 	}
 
 	if len(required) > 0 {
@@ -175,7 +178,12 @@ func (c *SimpleConverter) extractRequestBody(reqBody *RequestBody) map[string]an
 
 	// 获取JSON内容
 	if content, ok := reqBody.Content["application/json"]; ok {
-		return c.convertSchema(content.Schema)
+		schema := c.convertSchema(content.Schema)
+		// 如果没有 description，补充默认描述
+		if _, hasDesc := schema["description"]; !hasDesc {
+			schema["description"] = "Request Body 参数"
+		}
+		return schema
 	}
 
 	return nil
