@@ -1,4 +1,4 @@
-import { EventSourceMessage, fetchEventSource } from '@microsoft/fetch-event-source';
+import { type EventSourceMessage, fetchEventSource } from '@microsoft/fetch-event-source';
 import { isJSONString } from '@/utils/handle-function';
 import _ from 'lodash';
 import { config, LangType, IncrementalActionEnum, businessDomainHeaderKey } from './types';
@@ -9,7 +9,7 @@ export type StreamingOutServerType = {
   onMessage?: (event: EventSourceMessage) => void; // 接收一次数据段时回调，因为是流式返回，所以这个回调会被调用多次
   onClose?: () => void; // 正常结束的回调
   onError?: (error: any) => void; // 各种错误最终都会走这个回调
-  onOpen?: (controller: AbortController) => void; // 建立连接的时候
+  onOpen?: (controller: AbortController, response: any) => void; // 建立连接的时候
 };
 
 function convertLangType(lang: LangType): string {
@@ -38,8 +38,8 @@ export const streamingOutHttp = (param: StreamingOutServerType): AbortController
   const { url, body, method = 'POST', onMessage, onError, onClose, onOpen } = param;
   const controller = new AbortController();
   const signal = controller.signal;
-  let errorInfo = {};
   const fullUrl = `${getHttpBaseUrl()}${url}`;
+
   fetchEventSource(fullUrl, {
     signal,
     headers: getStreamingOutHttpHeaders(),
@@ -50,6 +50,7 @@ export const streamingOutHttp = (param: StreamingOutServerType): AbortController
     async onopen(response: Response) {
       if (!response.ok) {
         if (response.status === 401) {
+          controller.abort();
           // 说明token过期， 要自动续
           await config.refreshToken?.();
           streamingOutHttp(param);
@@ -60,18 +61,16 @@ export const streamingOutHttp = (param: StreamingOutServerType): AbortController
         const textDecoder = new TextDecoder('utf-8');
         const chunk = await reader?.read();
         const valueError = textDecoder.decode(chunk?.value);
-        console.log(valueError, '流式接口报错了');
         const description =
           typeof valueError === 'string'
             ? isJSONString(valueError)
               ? JSON.parse(valueError)
               : valueError
             : valueError;
-        errorInfo = { error: description, code: response.status };
-        console.log(errorInfo, 'errorInfo');
-        throw new Error(valueError);
+        const errorInfo = { error: description, code: response.status };
+        throw new Error(valueError, { cause: errorInfo });
       }
-      onOpen?.(controller);
+      onOpen?.(controller, response);
     },
     // 接收一次数据段时回调，因为是流式返回，所以这个回调会被调用多次
     onmessage: (event: EventSourceMessage) => {
@@ -79,18 +78,12 @@ export const streamingOutHttp = (param: StreamingOutServerType): AbortController
     },
     // 正常结束的回调
     onclose: () => {
-      controller.abort();
       onClose?.();
     },
     // 连接出现异常回调
     onerror: (error: Error) => {
-      controller.abort();
-      onError?.(errorInfo);
-      if (!_.isEmpty(error)) {
-        throw new Error(error.message);
-      } else {
-        throw new Error('报错了');
-      }
+      onError?.(error.cause);
+      throw new Error(error.message, { cause: error.cause });
     },
   });
   return controller;

@@ -1,4 +1,5 @@
 import { useRef, forwardRef, useImperativeHandle } from 'react';
+import classNames from 'classnames';
 import { Collapse } from 'antd';
 import { OperatorTypeEnum } from '@/components/OperatorList/types';
 import BaseInfo from './BaseInfo';
@@ -6,6 +7,7 @@ import ParamForm from './ParamForm';
 import { type ParamItem } from './types';
 
 interface MetadataProps {
+  disabled: boolean; // 禁用编辑
   operatorType: OperatorTypeEnum.Tool | OperatorTypeEnum.Operator; // 算子类型：工具 or 算子
   style?: React.CSSProperties;
   value: {
@@ -24,7 +26,7 @@ interface MetadataProps {
   }) => void;
 }
 
-const Metadata = forwardRef(({ operatorType, style, value, onChange }: MetadataProps, ref) => {
+const Metadata = forwardRef(({ disabled, operatorType, style, value, onChange }: MetadataProps, ref) => {
   const baseConfigRef = useRef<{ validate: () => Promise<boolean> }>(null);
   const inputParamFormRef = useRef<{ validate: () => boolean }>(null);
   const outputParamFormRef = useRef<{ validate: () => boolean }>(null);
@@ -55,7 +57,12 @@ const Metadata = forwardRef(({ operatorType, style, value, onChange }: MetadataP
   };
 
   return (
-    <div className="dip-pl-16 dip-pr-16" style={style}>
+    <div
+      className={classNames('dip-pl-16 dip-pr-16', {
+        'dip-disabled-edit': disabled,
+      })}
+      style={style}
+    >
       <Collapse
         defaultActiveKey={['info', 'inputParams', 'outputParams']}
         items={[

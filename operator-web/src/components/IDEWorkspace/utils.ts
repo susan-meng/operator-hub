@@ -186,3 +186,61 @@ export const generateParamValues = (params: ParamItem[]) => {
   });
   return values;
 };
+
+// 过滤inputs/outputs，将里面name不合法/为空 或 description为空的参数过滤掉
+export const filterInvalidParams = (params: ParamItem[] | undefined): ParamItem[] => {
+  // 提前返回空数组，避免不必要的计算
+  if (!params || params.length === 0) {
+    return [];
+  }
+
+  return params
+    .map(param => {
+      // 验证参数名称和描述
+      const isNameValid = paramValidationRules.name(param.name) === ParamValidateResultEnum.Valid;
+      const isDescriptionValid = paramValidationRules.description(param.description) === ParamValidateResultEnum.Valid;
+      if (!isNameValid || !isDescriptionValid) {
+        return undefined;
+      }
+
+      let sub_parameters: ParamItem[] | undefined;
+
+      if (param.type === ParamTypeEnum.Object) {
+        // 递归过滤Object类型的子参数
+        sub_parameters = filterInvalidParams(param.sub_parameters);
+      } else if (param.type === ParamTypeEnum.Array) {
+        // 处理Array类型参数，确保子参数存在
+        const arraySubParam = param.sub_parameters?.[0];
+        if (
+          arraySubParam &&
+          paramValidationRules.description(arraySubParam.description) === ParamValidateResultEnum.Valid
+        ) {
+          // 递归过滤Array类型参数的子参数
+          const filteredSubSubParams = filterInvalidParams(arraySubParam.sub_parameters);
+          sub_parameters = [
+            {
+              ...arraySubParam,
+              sub_parameters: filteredSubSubParams,
+            },
+          ];
+        }
+      }
+
+      return {
+        ...param,
+        sub_parameters,
+      };
+    })
+    .filter(Boolean) as ParamItem[];
+};
+
+// 给inputs/outpus增加id，用于前端界面的展示
+export const addParamId = (params: ParamItem[]): ParamItem[] => {
+  return params.map(param => {
+    return {
+      ...param,
+      id: param.id || generateRandomId(),
+      sub_parameters: param.sub_parameters ? addParamId(param.sub_parameters) : undefined,
+    };
+  });
+};

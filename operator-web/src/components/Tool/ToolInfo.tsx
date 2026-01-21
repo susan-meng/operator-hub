@@ -1,14 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { Collapse, Switch } from 'antd';
 import './style.less';
 import MethodTag from '../OperatorList/MethodTag';
 import JsonschemaTab from '../MyOperator/JsonschemaTab';
-import { ControlOutlined, EditOutlined, InteractionOutlined, ProfileOutlined } from '@ant-design/icons';
+import { EditOutlined, InteractionOutlined, ProfileOutlined } from '@ant-design/icons';
 import { ToolStatusEnum } from '../OperatorList/types';
 
 const { Panel } = Collapse;
 
-export default function ToolInfo({ selectedTool, type }: any) {
+const isNotExistTip = '无法获取，底层算子已被删除';
+const errorStyle = { color: 'red' };
+
+export default function ToolInfo({ selectedTool }: any) {
+  const [activeKey, setActiveKey] = useState<string[]>([]);
+  const isExist = useMemo(() => Boolean(selectedTool?.metadata?.version), [selectedTool?.metadata?.version]);
+
+  useEffect(() => {
+    if (!isExist) {
+      // 工具不存在，只显示信息，所以要默认展开信息Panel
+      setActiveKey(['1']);
+    }
+  }, [isExist]);
+
   const onChange = (checked: boolean) => {
     console.log(`switch to ${checked}`);
   };
@@ -17,9 +30,10 @@ export default function ToolInfo({ selectedTool, type }: any) {
     <div className="operator-info">
       <Collapse
         ghost
-        defaultActiveKey={''}
+        activeKey={activeKey}
         expandIconPosition="end"
         className="operator-details-collapse"
+        onChange={setActiveKey}
       >
         <Panel
           key="1"
@@ -37,38 +51,54 @@ export default function ToolInfo({ selectedTool, type }: any) {
             <div className="operator-info-title">工具规则</div>
             <div className="operator-info-desc">{selectedTool?.use_rule || '暂无规则'}</div>
             <div className="operator-info-title">Server URL</div>
-            <div className="operator-info-desc">{selectedTool?.metadata?.server_url}</div>
+            <div className="operator-info-desc" style={isExist ? {} : errorStyle}>
+              {isExist ? selectedTool?.metadata?.server_url : isNotExistTip}
+            </div>
             <div className="operator-info-title">工具路径</div>
-            <div className="operator-info-desc">{selectedTool?.metadata?.path}</div>
+            <div className="operator-info-desc" style={isExist ? {} : errorStyle}>
+              {isExist ? selectedTool?.metadata?.path : isNotExistTip}
+            </div>
             <div style={{ display: 'flex' }}>
               <div style={{ marginRight: '50px' }}>
                 <span style={{ marginRight: '6px', color: '#00000072' }}>请求方法</span>
-                <MethodTag status={selectedTool?.metadata?.method} />
+                {isExist ? (
+                  <MethodTag status={selectedTool?.metadata?.method} />
+                ) : (
+                  <div style={errorStyle}>{isNotExistTip}</div>
+                )}
               </div>
               <div>
                 <span style={{ marginRight: '6px', color: '#00000072' }}>工具状态</span>
-                <Switch
-                  size="small"
-                  value={selectedTool?.status !== ToolStatusEnum.Disabled}
-                  onChange={onChange}
-                  style={{ marginRight: '6px' }}
-                />
-                {selectedTool?.status === ToolStatusEnum.Disabled ? '未启用' : '已启用'}
+                {isExist ? (
+                  <>
+                    <Switch
+                      size="small"
+                      value={selectedTool?.status !== ToolStatusEnum.Disabled}
+                      onChange={onChange}
+                      style={{ marginRight: '6px' }}
+                    />
+                    {selectedTool?.status === ToolStatusEnum.Disabled ? '未启用' : '已启用'}
+                  </>
+                ) : (
+                  <div style={errorStyle}>{isNotExistTip}</div>
+                )}
               </div>
             </div>
           </div>
         </Panel>
-        <Panel
-          key="2"
-          header={
-            <span>
-              <InteractionOutlined /> 输入输出{' '}
-            </span>
-          }
-        >
-          <JsonschemaTab operatorInfo={selectedTool} type="Inputs" />
-          <JsonschemaTab operatorInfo={selectedTool} type="Outputs" />
-        </Panel>
+        {isExist && (
+          <Panel
+            key="2"
+            header={
+              <span>
+                <InteractionOutlined /> 输入输出{' '}
+              </span>
+            }
+          >
+            <JsonschemaTab operatorInfo={selectedTool} type="Inputs" />
+            <JsonschemaTab operatorInfo={selectedTool} type="Outputs" />
+          </Panel>
+        )}
       </Collapse>
     </div>
   );

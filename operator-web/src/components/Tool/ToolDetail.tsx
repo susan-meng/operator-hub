@@ -2,8 +2,8 @@ import type React from 'react';
 import { useMemo, useCallback, useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import classNames from 'classnames';
-import { Layout, Button, Typography, message, Switch, Checkbox, Empty } from 'antd';
-import { BarsOutlined, PlusOutlined } from '@ant-design/icons';
+import { Layout, Button, Typography, message, Switch, Checkbox, Empty, Tooltip, Alert } from 'antd';
+import { BarsOutlined, InfoCircleFilled, PlusOutlined } from '@ant-design/icons';
 import { FixedSizeList as List } from 'react-window';
 import './style.less';
 import {
@@ -39,6 +39,8 @@ enum LoadStatusEnum {
   Empty = 'empty',
 }
 
+const inValidMessage = '当前工具关联的底层算子已被删除，工具无法正常调用。建议您删除该工具后重新创建。';
+
 export default function ToolDetail() {
   const navigate = useNavigate();
   const [selectedTool, setSelectedTool] = useState<any>({});
@@ -58,6 +60,10 @@ export default function ToolDetail() {
   const [permissionCheckInfo, setIsPermissionCheckInfo] = useState<Array<PermConfigTypeEnum>>();
   const [toolListTotal, setToolListTotal] = useState(0);
   const [loadStatus, setLoadStatus] = useState<LoadStatusEnum>(LoadStatusEnum.Loading);
+
+  const hasDeletedSelection = useMemo(() => {
+    return selectedToolArry.some((item: any) => !item?.metadata?.version);
+  }, [selectedToolArry]);
 
   const canModify = useMemo(
     () => action === OperateTypeEnum.Edit && permissionCheckInfo?.includes(PermConfigTypeEnum.Modify),
@@ -217,18 +223,24 @@ export default function ToolDetail() {
                 {item.name}
               </Paragraph>
               {/* <Text >{item.name}</Text> */}
-              <MethodTag status={item.metadata?.method} style={{ height: '22px' }} />
+              {item.metadata?.method ? <MethodTag status={item.metadata?.method} style={{ height: '22px' }} /> : null}
 
-              <Switch
-                size="small"
-                value={item?.status === ToolStatusEnum.Enabled}
-                onChange={(val, e) => {
-                  e.stopPropagation();
-                  changeStatus([item]);
-                }}
-                style={{ marginLeft: 'auto' }}
-                disabled={action !== OperateTypeEnum.Edit}
-              />
+              {item.metadata?.version ? (
+                <Switch
+                  size="small"
+                  value={item?.status === ToolStatusEnum.Enabled}
+                  onChange={(val, e) => {
+                    e.stopPropagation();
+                    changeStatus([item]);
+                  }}
+                  style={{ marginLeft: 'auto' }}
+                  disabled={action !== OperateTypeEnum.Edit}
+                />
+              ) : (
+                <Tooltip title={inValidMessage}>
+                  <InfoCircleFilled style={{ color: '#faad14', marginLeft: 'auto', fontSize: 16, marginRight: 8 }} />
+                </Tooltip>
+              )}
             </div>
             <Paragraph className="side-list-item-desc" ellipsis={{ rows: 1 }} title={item.description}>
               {item.description}
@@ -377,7 +389,12 @@ export default function ToolDetail() {
                 {action === OperateTypeEnum.Edit && (
                   <div style={{ marginBottom: '10px' }}>
                     {permissionCheckInfo?.includes(PermConfigTypeEnum.Execute) && (
-                      <Button style={{ marginLeft: '10px' }} size="small" href="#targetDiv">
+                      <Button
+                        style={{ marginLeft: '10px' }}
+                        size="small"
+                        href="#targetDiv"
+                        disabled={!selectedTool?.metadata?.version}
+                      >
                         调试
                       </Button>
                     )}
@@ -392,6 +409,7 @@ export default function ToolDetail() {
                               <Button
                                 style={{ marginLeft: '10px' }}
                                 size="small"
+                                disabled={hasDeletedSelection}
                                 onClick={() => changeStatus(selectedToolArry)}
                               >
                                 启用({selectedToolIds.length})
@@ -400,6 +418,7 @@ export default function ToolDetail() {
                               <Button
                                 style={{ marginLeft: '10px' }}
                                 size="small"
+                                disabled={hasDeletedSelection}
                                 onClick={() => changeStatus(selectedToolArry)}
                               >
                                 禁用({selectedToolIds.length})
@@ -414,7 +433,12 @@ export default function ToolDetail() {
                       selectedToolIds.length === 1 &&
                         (toolBoxInfo?.metadata_type === MetadataTypeEnum.OpenAPI ||
                         selectedToolArry[0]?.resource_object === 'operator' ? (
-                          <Button style={{ marginLeft: '10px' }} size="small" onClick={() => setEditToolModal(true)}>
+                          <Button
+                            style={{ marginLeft: '10px' }}
+                            size="small"
+                            onClick={() => setEditToolModal(true)}
+                            disabled={hasDeletedSelection}
+                          >
                             编辑
                           </Button>
                         ) : (
@@ -422,6 +446,7 @@ export default function ToolDetail() {
                             style={{ marginLeft: '10px' }}
                             size="small"
                             onClick={() => navigateToEditToolInIDE(selectedToolIds[0])}
+                            disabled={hasDeletedSelection}
                           >
                             在IDE中编辑
                           </Button>
@@ -445,8 +470,21 @@ export default function ToolDetail() {
             </Sider>
             {/* 右侧内容区域 */}
             <Content style={{ background: 'white', borderRadius: '8px' }}>
+              {/* 工具不存在，警告 */}
+              {!selectedTool?.metadata?.version && (
+                <div className="tool-detail-warning">
+                  <Alert
+                    message={inValidMessage}
+                    banner
+                    style={{
+                      borderRadius: '6px',
+                    }}
+                  />
+                </div>
+              )}
+
               <ToolInfo selectedTool={selectedTool} />
-              {permissionCheckInfo?.includes(PermConfigTypeEnum.Execute) && (
+              {selectedTool?.metadata?.version && permissionCheckInfo?.includes(PermConfigTypeEnum.Execute) && (
                 <div id="targetDiv">
                   <DebugResult selectedTool={selectedTool} type={OperatorTypeEnum.ToolBox} />
                 </div>

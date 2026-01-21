@@ -248,8 +248,8 @@ const ParamForm = forwardRef(({ value = [], onChange }: ParamFormProps, ref) => 
       // 改变类型时，清空子参数、子子参数的错误信息，子参数、子子参数，都是以 paramKey. 开头的
       setErrors(prev => {
         const newErrors = new Map(prev);
-        newErrors.forEach((_, key) => {
-          if (key.startsWith(paramKey + '.')) {
+        prev.forEach((_, key) => {
+          if (key?.startsWith(paramKey + '.')) {
             newErrors.delete(key);
           }
         });

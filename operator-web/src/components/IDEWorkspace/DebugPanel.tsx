@@ -92,9 +92,9 @@ const DebugPanel: FC<TestCodeProps> = ({ inputs, code, onClose, onUpdateStdoutLi
               className="dip-c-bold dip-flex-space-between dip-user-select-none"
             >
               输入
-              {/* <Tooltip title="自动生成">
+              <Tooltip title="自动生成">
                 <AutoGenIcon className="dip-pointer" onClick={autoGenInputs} />
-              </Tooltip> */}
+              </Tooltip>
             </div>
             <JSONEditor
               height="calc(100% - 124px)"

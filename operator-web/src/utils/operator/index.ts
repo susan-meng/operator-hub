@@ -21,41 +21,41 @@ export function resolveRefPath(ref: any, doc: any) {
  * @returns {object} 处理后的新对象
  */
 export function dereference(obj: any, doc: any, visited = new Set()): object {
-    // 处理基本类型
-    if (typeof obj !== 'object' || obj === null) {
-        return obj;
-    }
+  // 处理基本类型
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
 
-    // 检测循环引用
-    if (visited.has(obj)) {
-        return {}; // 遇到循环引用返回空对象避免无限递归
-    }
-    visited.add(obj);
+  // 检测循环引用
+  if (visited.has(obj)) {
+    return {}; // 遇到循环引用返回空对象避免无限递归
+  }
+  visited.add(obj);
 
-    // 处理数组
-    if (Array.isArray(obj)) {
-        return obj.map((item: any) => dereference(item, doc, visited));
-    }
+  // 处理数组
+  if (Array.isArray(obj)) {
+    return obj.map((item: any) => dereference(item, doc, visited));
+  }
 
-    // 处理 $ref 引用
-    if (obj.$ref) {
-        const resolved = resolveRefPath(obj.$ref, doc);
-        if (resolved) return dereference(resolved, doc, visited); // 传递visited集合
-    }
+  // 处理 $ref 引用
+  if (obj.$ref) {
+    const resolved = resolveRefPath(obj.$ref, doc);
+    if (resolved) return dereference(resolved, doc, visited); // 传递visited集合
+  }
 
-    // 处理普通对象
-    const result: any = {};
-    for (const key in obj) {
-        if (obj?.hasOwnProperty(key)) {
-            result[key] = dereference(obj[key], doc, visited);
-        }
+  // 处理普通对象
+  const result: any = {};
+  for (const key in obj) {
+    if (obj?.hasOwnProperty(key)) {
+      result[key] = dereference(obj[key], doc, visited);
     }
-    visited.delete(obj); // 移除已处理对象，允许在其他分支中重用
-    return result;
+  }
+  visited.delete(obj); // 移除已处理对象，允许在其他分支中重用
+  return result;
 }
 
 // 递归函数，用于将JSONSchema转换为表格数据
-export const getTableData = (schema, parentKey = '') => {
+export const getTableData = (schema, parentKey = '', location: string = '') => {
   const data = [];
   for (const key in schema?.properties) {
     const property = schema?.properties[key];
@@ -66,11 +66,12 @@ export const getTableData = (schema, parentKey = '') => {
       type: property.type,
       required: Array.isArray(schema?.required) ? schema.required.includes(key) : false,
       description: property.description || '',
+      ...(location ? { in: location } : {}),
     };
     if (property.type === 'object' && property?.properties) {
-      row.children = getTableData(property, name);
+      row.children = getTableData(property, name, location);
     } else if (property.type === 'array' && property.items && property.items.properties) {
-      row.children = getTableData(property.items, `${name}[].`);
+      row.children = getTableData(property.items, `${name}[].`, location);
     }
     data.push(row);
   }

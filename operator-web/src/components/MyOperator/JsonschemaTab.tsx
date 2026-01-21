@@ -12,11 +12,17 @@ const generateParamsTableData = (parameters: any[]) => {
   }));
 };
 
-const JsonschemaTab = ({ operatorInfo, type }: any) => {
+const JsonschemaTab = ({ operatorInfo, type, data }: any) => {
   const [tableData, setTableData] = useState<any>([]);
   const jsonSchema = operatorInfo?.metadata?.api_spec;
 
   useEffect(() => {
+    if (data) {
+      // mcp的数据结构跟工具/算子的不一样，所以由父组件处理好传进来
+      setTableData(data);
+      return;
+    }
+
     if (type === 'Inputs') {
       // 生成 header、query、path、cookie 参数的表格数据
       const headerQueryPathCookieParams = generateParamsTableData(jsonSchema?.parameters || []);
@@ -31,7 +37,6 @@ const JsonschemaTab = ({ operatorInfo, type }: any) => {
       };
       const resolvedParameters = dereference(newSchemas.parameters, newSchemas);
       setTableData([...headerQueryPathCookieParams, ...getTableData(resolvedParameters)]);
-      // console.log(55, resolvedParameters, getTableData(resolvedParameters));
     } else {
       const successRes = jsonSchema?.responses?.find((item: any) => item.status_code === '200');
       const successResJson =
@@ -43,13 +48,8 @@ const JsonschemaTab = ({ operatorInfo, type }: any) => {
       const resolvedParameters = dereference(newSchemas.parameters, newSchemas);
       setTableData(getTableData(resolvedParameters));
     }
-  }, [operatorInfo]);
+  }, [operatorInfo, data]);
 
-  const uiSchema = {
-    name: { 'ui:placeholder': 'Enter your name' },
-    age: { 'ui:placeholder': 'Enter your age' },
-    email: { 'ui:placeholder': 'Enter your email' },
-  };
   const columns = [
     {
       title: '字段',

@@ -17,11 +17,6 @@ ADP Operator Web前端项目，基于React + TypeScript + Ant Design构建的现
 │   ├── apis/                    # API接口管理
 │   ├── assets/                  # 应用静态资源
 │   ├── components/              # React组件
-│   │   ├── Actions/
-│   │   ├── Format/
-│   │   ├── Logics/
-│   │   ├── MCP/
-│   │   └── ...
 │   ├── hooks/                    # 自定义Hooks
 │   ├── i18n/                     # 国际化配置
 │   ├── pages/                    # 页面入口
@@ -143,16 +138,6 @@ yarn test
 - **微前端支持**：为微前端架构提供适配
 - **路径别名配置**：简化模块导入路径
 - **性能优化**：内置代码分割、压缩等优化策略
-
-### 代码提交规范
-
-- feat: 新功能
-- fix: 修复bug
-- docs: 文档更新
-- style: 代码格式调整
-- refactor: 代码重构
-- test: 测试相关
-- chore: 构建过程或辅助工具变动
 
 ---
 

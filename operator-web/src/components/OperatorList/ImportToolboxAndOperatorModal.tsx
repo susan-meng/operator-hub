@@ -8,8 +8,9 @@ import OpenApiIcon from '@/assets/icons/open-api.svg';
 import ADPIcon from '@/assets/icons/adp.svg';
 import CheckedIcon from '@/assets/icons/checked.svg';
 import TemplateDownloadSection from '@/components/TemplateDownloadSection';
+import { showImportFailedData } from '@/components/Tool/ImportFailed';
 import { OperatorTypeEnum } from './types';
-import { getOperatorTypeName } from './utils';
+import { getOperatorTypeName, extractOperatorName } from './utils';
 
 import styles from './ImportToolboxAndOperatorModal.module.less';
 
@@ -132,9 +133,19 @@ const ImportMcpAndOperatorModal: React.FC<ImportToolModalProps> = ({ activeTab, 
           formData.append('metadata_type', 'openapi');
           await postToolBox(formData);
         } else {
-          // 处理算子导入
+          // 处理算子导入(批量)
           formData.append('operator_metadata_type', 'openapi');
-          await postOperatorRegiste(formData);
+          const result: any[] = await postOperatorRegiste(formData);
+          const failedData = result
+            .filter(item => item.status === 'failed')
+            .map(item => ({ tool_name: extractOperatorName(item?.error?.description), error_msg: item?.error }));
+
+          message.success(`上传成功${result?.length - failedData?.length}个`);
+          if (failedData?.length) {
+            showImportFailedData(failedData);
+          }
+          onOk();
+          return;
         }
       }
 

@@ -37,9 +37,9 @@ spec:
                 "parent": "root",
                 "orderIndex": 2500,
                 "app": {
-                  "textZHCN": "算子工厂",
-                  "textZHTW": "算子工厂",
-                  "textENUS": "Operator Factory",
+                  "textZHCN": "执行工厂",
+                  "textZHTW": "執行工廠",
+                  "textENUS": "Execution Factory",
                   "icon": "//ip:port/operator-web/public/operator-factory.svg"
                 },
                 "subapp": {"children": {}}
@@ -49,9 +49,9 @@ spec:
                 "parent": "operator-factory",
                 "orderIndex": 0,
                 "app": {
-                  "textZHCN": "算子管理",
-                  "textZHTW": "算子管理",
-                  "textENUS": "My Operator",
+                  "textZHCN": "执行单元管理",
+                  "textZHTW": "執行單元管理",
+                  "textENUS": "Unit Manager",
                   "icon": "//ip:port/operator-web/public/my-operator.svg"
                 },
                 "subapp": {
@@ -65,9 +65,9 @@ spec:
                 "parent": "operator-factory",
                 "orderIndex": 1,
                 "app": {
-                  "textZHCN": "全部算子",
-                  "textZHTW": "全部算子",
-                  "textENUS": "All Operator",
+                  "textZHCN": "全部执行单元",
+                  "textZHTW": "全部執行單元",
+                  "textENUS": "All Execution Units",
                   "icon": "//ip:port/operator-web/public/all-operator.svg"
                 },
                 "subapp": {

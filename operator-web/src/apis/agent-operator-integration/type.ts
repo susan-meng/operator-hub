@@ -123,3 +123,28 @@ export interface FunctionExecuteResponse {
   result: object; // 函数执行结果
   metrics: object; // 函数执行指标
 }
+
+export enum AIGenTypeEnum {
+  PythonFunctionGenerator = 'python_function_generator',
+  MetadataParamGenerator = 'metadata_param_generator',
+}
+
+export interface PostAIGenCodeRequest {
+  type: AIGenTypeEnum;
+  query?: string; // 用户提示词，当type=python_function_generator时必填
+  code?: string; // 代码内容，当type=metadata_param_generator时必填
+  inputs?: Array<any>; // 参数列表
+  outputs?: Array<any>; // 输出参数列表
+  stream?: boolean; // 是否流式输出。Default: false
+}
+
+export interface PostAIGenCodeResponse {
+  // 响应内容; 当type=python_function_generator时，content为函数代码string类型，当type=metadata_param_generator时，content为以下结构
+  content: {
+    name: string; // 函数名
+    description: string; // 函数描述
+    use_rule: string; // 使用规则
+    inputs: any[]; // 参数列表
+    outputs: any[]; // 输出参数列表
+  };
+}

@@ -170,3 +170,20 @@ export const getFormConfig = (originalSchema: any): FormConfig => {
     uiSchema,
   };
 };
+
+// 从错误信息中解析出算子名称
+export function extractOperatorName(errorMessage: string) {
+  if (!errorMessage || typeof errorMessage !== 'string') {
+    return '';
+  }
+
+  // 定义所有可能的引号字符
+  const leftQuotes = `'"“`;
+  const rightQuotes = `'"”`;
+
+  // 构建正则表达式
+  const regex = new RegExp(`[${leftQuotes}]([^${leftQuotes}${rightQuotes}]+)[${rightQuotes}]`);
+
+  const match = errorMessage.match(regex);
+  return match ? match[1].trim() : '';
+}
