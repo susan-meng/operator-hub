@@ -1,5 +1,6 @@
 import { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
 import { Radio, Button, message, Input, Modal } from 'antd';
+import classNames from 'classnames';
 import { type EventSourceMessage } from '@microsoft/fetch-event-source';
 import AIGenIcon from '@/assets/icons/ai-gen.svg';
 import CodeIcon from '@/assets/icons/code.svg';
@@ -13,6 +14,7 @@ import { useMicroWidgetProps } from '@/hooks';
 import Metadata from './Metadata';
 import { filterInvalidParams, addParamId } from './utils';
 import { type ToolDetail } from './types';
+import styles from './EditingArea.module.less';
 
 enum TabEnum {
   Code = 'code',
@@ -72,7 +74,6 @@ const EditingArea = forwardRef(({ operatorType, value, onChange }: EditingAreaPr
   const handleAIGenCode = async (query: string) => {
     hideAILoadingMessageRef.current = message.loading({
       content: 'AI 生成代码中...',
-      duration: 0,
     });
     setAICodeGenerating(true);
     let hasError = false;
@@ -146,7 +147,6 @@ const EditingArea = forwardRef(({ operatorType, value, onChange }: EditingAreaPr
 
     hideAILoadingMessageRef.current = message.loading({
       content: 'AI 生成元数据中...',
-      duration: 0,
     });
     setAIMetadataGenerating(true);
 
@@ -202,8 +202,9 @@ const EditingArea = forwardRef(({ operatorType, value, onChange }: EditingAreaPr
             disabled={aiMetadataGenerating} // 当ai生成元数据进行中时，禁用ai生成代码
             loading={aiCodeGenerating}
             onClick={() => setShowAIConfirm(true)}
+            className={styles['ai-btn']}
           >
-            AI生成代码
+            <span className={styles['text']}>AI生成代码</span>
           </Button>
         ) : (
           <Button
@@ -212,8 +213,9 @@ const EditingArea = forwardRef(({ operatorType, value, onChange }: EditingAreaPr
             disabled={aiCodeGenerating} // 当ai生成代码进行中时，禁用ai生成元数据
             loading={aiMetadataGenerating}
             onClick={handleAIGenMetadata}
+            className={styles['ai-btn']}
           >
-            AI生成元数据
+            <span className={styles['text']}>AI生成元数据</span>
           </Button>
         )}
       </div>
@@ -242,32 +244,29 @@ const EditingArea = forwardRef(({ operatorType, value, onChange }: EditingAreaPr
         <Modal
           open
           centered
-          title="确认生成代码？"
-          okText="确认"
-          cancelText="取消"
-          onOk={() => {
-            handleAIGenCode(query);
-            setShowAIConfirm(false);
-          }}
-          onCancel={() => setShowAIConfirm(false)}
-          okButtonProps={{
-            disabled: !query,
-            className: 'dip-w-74',
-          }}
-          cancelButtonProps={{
-            className: 'dip-w-74',
-          }}
+          title="使用 AI 生成代码"
+          width={448}
           getContainer={() => microWidgetProps?.container}
-          footer={(_, { OkBtn, CancelBtn }) => (
-            <>
-              <OkBtn />
-              <CancelBtn />
-            </>
+          footer={() => (
+            <Button
+              icon={<AIGenIcon className="dip-font-16" />}
+              type="text"
+              disabled={!query}
+              onClick={() => {
+                handleAIGenCode(query);
+                setShowAIConfirm(false);
+              }}
+              className={classNames(styles['ai-btn'], styles['ai-btn-in-drawer'])}
+              style={!query ? { opacity: 0.35 } : {}}
+            >
+              <span className={styles['text']}>AI生成代码</span>
+            </Button>
           )}
         >
           <Input.TextArea
-            autoSize={{ minRows: 4, maxRows: 8 }}
-            placeholder="请输入生成代码的描述"
+            className="dip-mt-8 dip-mb-8"
+            autoSize={{ minRows: 5, maxRows: 5 }}
+            placeholder="描述工具的用途，如：创建一个自动获取网络资讯的工具，能够根据用户输入的关键词，实时抓取相关新闻摘要，并整理为简洁的列表形式输出"
             onChange={e => {
               setQuery(e.target.value);
             }}
