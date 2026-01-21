@@ -7,12 +7,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common/ormhelper"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/config"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/db"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces/model"
 	"github.com/kweaver-ai/proton-rds-sdk-go/sqlx"
-	"github.com/google/uuid"
 	"github.com/pkg/errors"
 )
 
@@ -515,6 +515,17 @@ func (t *toolDB) SelectToolBoxByToolIDs(ctx context.Context, toolIDs []string) (
 	err = t.orm.Select().From(tbTool).WhereIn("f_tool_id", args...).Get(ctx, &tools)
 	if err != nil {
 		err = errors.Wrapf(err, "select tool box by tool ids error")
+	}
+	return
+}
+
+// SelectToolBySource 根据来源类型和来源ID查询工具
+func (t *toolDB) SelectToolBySource(ctx context.Context, sourceType model.SourceType, sourceID string) (tools []*model.ToolDB, err error) {
+	orm := t.orm
+	tools = []*model.ToolDB{}
+	err = orm.Select().From(tbTool).WhereEq("f_source_type", sourceType).WhereEq("f_source_id", sourceID).Get(ctx, &tools)
+	if err != nil {
+		err = errors.Wrapf(err, "select tool by source error")
 	}
 	return
 }

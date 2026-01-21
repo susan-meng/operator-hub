@@ -650,3 +650,42 @@ func (mr *MockMFModelAPIClientMockRecorder) StreamChatCompletion(ctx, req any) *
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StreamChatCompletion", reflect.TypeOf((*MockMFModelAPIClient)(nil).StreamChatCompletion), ctx, req)
 }
+
+// MockMFModelManager is a mock of MFModelManager interface.
+type MockMFModelManager struct {
+	ctrl     *gomock.Controller
+	recorder *MockMFModelManagerMockRecorder
+	isgomock struct{}
+}
+
+// MockMFModelManagerMockRecorder is the mock recorder for MockMFModelManager.
+type MockMFModelManagerMockRecorder struct {
+	mock *MockMFModelManager
+}
+
+// NewMockMFModelManager creates a new mock instance.
+func NewMockMFModelManager(ctrl *gomock.Controller) *MockMFModelManager {
+	mock := &MockMFModelManager{ctrl: ctrl}
+	mock.recorder = &MockMFModelManagerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockMFModelManager) EXPECT() *MockMFModelManagerMockRecorder {
+	return m.recorder
+}
+
+// GetPromptByPromptID mocks base method.
+func (m *MockMFModelManager) GetPromptByPromptID(ctx context.Context, promptID string) (*interfaces.GetPromptResp, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPromptByPromptID", ctx, promptID)
+	ret0, _ := ret[0].(*interfaces.GetPromptResp)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPromptByPromptID indicates an expected call of GetPromptByPromptID.
+func (mr *MockMFModelManagerMockRecorder) GetPromptByPromptID(ctx, promptID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPromptByPromptID", reflect.TypeOf((*MockMFModelManager)(nil).GetPromptByPromptID), ctx, promptID)
+}

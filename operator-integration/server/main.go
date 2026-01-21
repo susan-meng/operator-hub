@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/driveradapters"
@@ -19,6 +22,7 @@ type Server struct {
 	httpHealthHandler  interfaces.HTTPRouterInterface
 	restPublicHandler  interfaces.HTTPRouterInterface
 	restPrivateHandler interfaces.HTTPRouterInterface
+	MQHandler          interfaces.MQHandler
 	outboxMessageEvent interfaces.App
 	config             *config.Config
 }
@@ -31,8 +35,9 @@ func (s *Server) Start() {
 		s.config.Logger.Errorf("start outbox message event failed, error: %v", err)
 		panic(err)
 	}
+
+	// 注册路由 - 健康检查
 	go func() {
-		// 注册路由 - 健康检查
 		engine := gin.New()
 		engine.Use(gin.Recovery())
 		engine.UseRawPath = true
@@ -55,6 +60,8 @@ func (s *Server) Start() {
 			s.config.Logger.Errorf("start server failed, error: %v", err)
 		}
 	}()
+	// 启动MQ处理
+	go s.MQHandler.Subscribe()
 }
 
 // Stop 停止服务
@@ -74,6 +81,7 @@ func main() {
 		restPublicHandler:  driveradapters.NewRestPublicHandler(),
 		restPrivateHandler: driveradapters.NewRestPrivateHandler(),
 		outboxMessageEvent: logicscommon.NewOutboxMessageEvent(),
+		MQHandler:          driveradapters.NewMQHandler(),
 	}
 	s.config.Logger.Info("start agent-operator-integration server")
 	// 检查是否开启了可观测性
@@ -82,5 +90,8 @@ func main() {
 	}
 	s.Start()
 	defer s.Stop(context.Background())
-	select {}
+	// 等待信号量
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT) //nolint
+	<-c
 }

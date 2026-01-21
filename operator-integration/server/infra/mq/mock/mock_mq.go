@@ -55,13 +55,13 @@ func (mr *MockMQClientMockRecorder) Publish(ctx, topic, message any) *gomock.Cal
 }
 
 // Subscribe mocks base method.
-func (m *MockMQClient) Subscribe(ctx context.Context, topic, channel string, cmd func([]byte) error) {
+func (m *MockMQClient) Subscribe(topic, channel string, cmd func(context.Context, []byte) error) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "Subscribe", ctx, topic, channel, cmd)
+	m.ctrl.Call(m, "Subscribe", topic, channel, cmd)
 }
 
 // Subscribe indicates an expected call of Subscribe.
-func (mr *MockMQClientMockRecorder) Subscribe(ctx, topic, channel, cmd any) *gomock.Call {
+func (mr *MockMQClientMockRecorder) Subscribe(topic, channel, cmd any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Subscribe", reflect.TypeOf((*MockMQClient)(nil).Subscribe), ctx, topic, channel, cmd)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Subscribe", reflect.TypeOf((*MockMQClient)(nil).Subscribe), topic, channel, cmd)
 }

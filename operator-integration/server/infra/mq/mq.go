@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"sync"
 
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/config"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	msqclient "github.com/kweaver-ai/proton-mq-sdk-go"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -19,7 +19,7 @@ import (
 
 // MQClient mq客户端接口
 type MQClient interface {
-	Subscribe(ctx context.Context, topic string, channel string, cmd func([]byte) error)
+	Subscribe(topic string, channel string, cmd func(context.Context, []byte) error)
 	Publish(ctx context.Context, topic string, message []byte) error
 }
 
@@ -54,9 +54,10 @@ func NewMQClient() MQClient {
 }
 
 // Subscribe 订阅
-func (m *msgQueue) Subscribe(ctx context.Context, topic, channel string, cmd func([]byte) error) {
+func (m *msgQueue) Subscribe(topic, channel string, cmd func(context.Context, []byte) error) {
 	go func() {
 		var err error
+		ctx := context.Background()
 		tracer := otel.GetTracerProvider()
 		if tracer != nil {
 			var span trace.Span
@@ -66,7 +67,9 @@ func (m *msgQueue) Subscribe(ctx context.Context, topic, channel string, cmd fun
 			span.SetAttributes(attribute.String("messaging.channel", channel))
 			defer o11y.EndSpan(ctx, err)
 		}
-		err = m.protonMQClient.Sub(topic, channel, cmd, m.pollIntervalMilliseconds, m.maxInFlight)
+		err = m.protonMQClient.Sub(topic, channel, func(msg []byte) error {
+			return cmd(ctx, msg)
+		}, m.pollIntervalMilliseconds, m.maxInFlight)
 		m.logger.WithContext(ctx).Errorf("subscribe mq topic: %s, channel: %s,  error: %v", topic, channel, err)
 	}()
 }

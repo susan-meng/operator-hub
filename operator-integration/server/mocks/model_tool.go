@@ -208,6 +208,21 @@ func (mr *MockIToolDBMockRecorder) SelectToolByBoxID(ctx, boxID any) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SelectToolByBoxID", reflect.TypeOf((*MockIToolDB)(nil).SelectToolByBoxID), ctx, boxID)
 }
 
+// SelectToolBySource mocks base method.
+func (m *MockIToolDB) SelectToolBySource(ctx context.Context, sourceType model.SourceType, sourceID string) ([]*model.ToolDB, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SelectToolBySource", ctx, sourceType, sourceID)
+	ret0, _ := ret[0].([]*model.ToolDB)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SelectToolBySource indicates an expected call of SelectToolBySource.
+func (mr *MockIToolDBMockRecorder) SelectToolBySource(ctx, sourceType, sourceID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SelectToolBySource", reflect.TypeOf((*MockIToolDB)(nil).SelectToolBySource), ctx, sourceType, sourceID)
+}
+
 // SelectToolLisByBoxID mocks base method.
 func (m *MockIToolDB) SelectToolLisByBoxID(ctx context.Context, boxID string, filter map[string]any) ([]*model.ToolDB, error) {
 	m.ctrl.T.Helper()

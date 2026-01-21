@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"net/http"
 
+	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/common"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/infra/errors"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/interfaces/model"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/logics/metric"
 	"github.com/kweaver-ai/operator-hub/operator-integration/server/utils"
-	o11y "github.com/kweaver-ai/kweaver-go-lib/observability"
 )
 
 // DeleteOperator 删除算子
@@ -139,7 +139,7 @@ func (m *operatorManager) deleteOperator(ctx context.Context, tx *sql.Tx, item *
 		err = errors.DefaultHTTPError(ctx, http.StatusInternalServerError, "delete operator failed")
 		return
 	}
-	err = m.publishOperatorDeleteEvent(ctx, item)
+	err = m.publishOperatorDeleteEvent(ctx, item, accessor.ID)
 	if err != nil {
 		return
 	}
@@ -161,7 +161,7 @@ func (m *operatorManager) deleteOperator(ctx context.Context, tx *sql.Tx, item *
 }
 
 // 发送删除事件通知
-func (m *operatorManager) publishOperatorDeleteEvent(ctx context.Context, operatorDB *model.OperatorRegisterDB) (err error) {
+func (m *operatorManager) publishOperatorDeleteEvent(ctx context.Context, operatorDB *model.OperatorRegisterDB, updateUser string) (err error) {
 	// 通知删除
 	extendInfo := map[string]interface{}{}
 	if operatorDB.ExtendInfo != "" {
@@ -180,6 +180,7 @@ func (m *operatorManager) publishOperatorDeleteEvent(ctx context.Context, operat
 		OperatorType: interfaces.OperatorType(operatorDB.OperatorType),
 		IsDataSource: operatorDB.IsDataSource,
 		ExtendInfo:   extendInfo,
+		UpdateUser:   updateUser,
 	}))
 	if err != nil {
 		m.Logger.WithContext(ctx).Errorf("publish operator delete event failed, OperatorID: %s, err: %v", operatorDB.OperatorID, err)

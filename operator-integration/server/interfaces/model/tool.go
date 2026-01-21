@@ -57,4 +57,5 @@ type IToolDB interface {
 	// 获取工具箱ID，根据查询条件及GROUP BY
 	SelectToolBoxIDsByFilter(ctx context.Context, filter map[string]interface{}) ([]string, error)
 	SelectToolBoxByToolIDs(ctx context.Context, toolIDs []string) ([]*ToolDB, error)
+	SelectToolBySource(ctx context.Context, sourceType SourceType, sourceID string) ([]*ToolDB, error)
 }

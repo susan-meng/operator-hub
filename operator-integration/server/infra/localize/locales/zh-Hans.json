@@ -100,6 +100,7 @@
         "ToolOperatorNotAllowEdit": "算子工具不允许编辑元数据",
         "ToolConvertMetadataTypeNotMatch": "算子元数据类型与工具不匹配",
         "ToolTypeMismatch": "工具类型与工具箱类型不匹配",
+        "ToolRefOperatorNotFound": "工具“%s”不可启用，依赖的算子已被删除，请重新配置",
         "InternalToolBoxVersion": "内部工具箱版本号格式错误",
         "MCPModeNotSupported": "暂不支持“%s” MCP模式",
         "MCPExists": "MCP “%s” 已存在",

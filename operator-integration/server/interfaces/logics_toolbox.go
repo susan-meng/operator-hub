@@ -420,6 +420,13 @@ type IToolService interface {
 	// Impex[*ToolBoxImpexData]
 	Import(ctx context.Context, tx *sql.Tx, mode ImportType, data *ComponentImpexConfigModel, userID string) (err error)
 	Export(ctx context.Context, req *ExportReq) (data *ComponentImpexConfigModel, err error)
+	// 事件处理
+	ToolBoxEventHandler
+}
+
+// ToolBoxEventHandler 事件处理接口
+type ToolBoxEventHandler interface {
+	HandleOperatorDeleteEvent(ctx context.Context, message []byte) error
 }
 
 // CreateInternalToolBoxReq 内部工具箱注册请求

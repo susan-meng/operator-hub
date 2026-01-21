@@ -143,8 +143,7 @@ func (s *ToolServiceImpl) checkBoxToolSame(ctx context.Context, boxID, name, met
 			return
 		}
 		if toolInfo.Metadata == nil {
-			err = fmt.Errorf("tool %s metadata is nil", tool.Name)
-			s.Logger.WithContext(ctx).Warnf("parse metadata failed, err: %v", err)
+			s.Logger.WithContext(ctx).Warnf("toolbox %s tool %s:%s metadata is nil", boxID, tool.Name, tool.ToolID)
 			continue
 		}
 		val := validatorMethodPath(toolInfo.Metadata.Method, toolInfo.Metadata.Path)

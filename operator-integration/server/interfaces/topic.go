@@ -2,6 +2,11 @@ package interfaces
 
 /*该文件定义了Topic常量，统一记录方便统计 */
 
+const (
+	// ChannelMessage 算子集成事件Channel
+	ChannelMessage = "operator_integration" // channel
+)
+
 // 监听外部事件Topic列表
 const (
 	// AuthResourceNameModifyTopic 资源名称变更Topic
@@ -26,4 +31,5 @@ type OperatorDeleteEvent struct {
 	IsDataSource bool                   `json:"is_data_source" form:"is_data_source" default:"false"` // 是否为数据源算子
 	ExtendInfo   map[string]interface{} `json:"extend_info"`
 	OperatorType OperatorType           `json:"operator_type" form:"operator_type" default:"basic" validate:"oneof=basic composite"` // 算子类型(basic/composite
+	UpdateUser   string                 `json:"update_user"`
 }

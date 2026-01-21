@@ -64,6 +64,7 @@ const (
 	ErrExtToolNotExistInFile              ErrorCode = "ToolNotExistInFile"              // 您上传的文件未包含已存在的工具
 	ErrExtToolConvertMetadataTypeNotMatch ErrorCode = "ToolConvertMetadataTypeNotMatch" // 算子元数据类型与工具不匹配
 	ErrExtToolTypeMismatch                ErrorCode = "ToolTypeMismatch"                // 工具类型与工具箱类型不匹配
+	ErrExtToolRefOperatorNotFound         ErrorCode = "ToolRefOperatorNotFound"         // 工具“%s”不可启用，依赖的算子已被删除，请重新配置
 )
 
 // MCP拓展错误码定义

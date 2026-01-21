@@ -100,6 +100,7 @@
         "ToolOperatorNotAllowEdit": "Operator tool is not allowed to edit metadata",
         "ToolConvertMetadataTypeNotMatch": "Operator metadata type does not match tool type",
         "ToolTypeMismatch": "Tool type does not match toolbox type",
+        "ToolRefOperatorNotFound": "Tool \"%s\" cannot be enabled - dependent operator deleted, please reconfigure",
         "InternalToolBoxVersion": "The internal toolbox version number is malformed",
         "MCPModeNotSupported": "MCP mode \"%s\" is not supported",
         "MCPExists": "MCP \"%s\" already exists",
