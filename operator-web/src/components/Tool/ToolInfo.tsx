@@ -8,6 +8,9 @@ import { ToolStatusEnum } from '../OperatorList/types';
 
 const { Panel } = Collapse;
 
+const isNotExistTip = '无法获取，底层算子已被删除';
+const errorStyle = { color: 'red' };
+
 export default function ToolInfo({ selectedTool }: any) {
   const [activeKey, setActiveKey] = useState<string[]>([]);
   const isExist = useMemo(() => Boolean(selectedTool?.metadata?.version), [selectedTool?.metadata?.version]);
@@ -48,23 +51,37 @@ export default function ToolInfo({ selectedTool }: any) {
             <div className="operator-info-title">工具规则</div>
             <div className="operator-info-desc">{selectedTool?.use_rule || '暂无规则'}</div>
             <div className="operator-info-title">Server URL</div>
-            <div className="operator-info-desc">{selectedTool?.metadata?.server_url}</div>
+            <div className="operator-info-desc" style={isExist ? {} : errorStyle}>
+              {isExist ? selectedTool?.metadata?.server_url : isNotExistTip}
+            </div>
             <div className="operator-info-title">工具路径</div>
-            <div className="operator-info-desc">{selectedTool?.metadata?.path}</div>
+            <div className="operator-info-desc" style={isExist ? {} : errorStyle}>
+              {isExist ? selectedTool?.metadata?.path : isNotExistTip}
+            </div>
             <div style={{ display: 'flex' }}>
               <div style={{ marginRight: '50px' }}>
                 <span style={{ marginRight: '6px', color: '#00000072' }}>请求方法</span>
-                <MethodTag status={selectedTool?.metadata?.method} />
+                {isExist ? (
+                  <MethodTag status={selectedTool?.metadata?.method} />
+                ) : (
+                  <div style={errorStyle}>{isNotExistTip}</div>
+                )}
               </div>
               <div>
                 <span style={{ marginRight: '6px', color: '#00000072' }}>工具状态</span>
-                <Switch
-                  size="small"
-                  value={selectedTool?.status !== ToolStatusEnum.Disabled}
-                  onChange={onChange}
-                  style={{ marginRight: '6px' }}
-                />
-                {selectedTool?.status === ToolStatusEnum.Disabled ? '未启用' : '已启用'}
+                {isExist ? (
+                  <>
+                    <Switch
+                      size="small"
+                      value={selectedTool?.status !== ToolStatusEnum.Disabled}
+                      onChange={onChange}
+                      style={{ marginRight: '6px' }}
+                    />
+                    {selectedTool?.status === ToolStatusEnum.Disabled ? '未启用' : '已启用'}
+                  </>
+                ) : (
+                  <div style={errorStyle}>{isNotExistTip}</div>
+                )}
               </div>
             </div>
           </div>
