@@ -1,14 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { Collapse, Switch } from 'antd';
 import './style.less';
 import MethodTag from '../OperatorList/MethodTag';
 import JsonschemaTab from '../MyOperator/JsonschemaTab';
-import { ControlOutlined, EditOutlined, InteractionOutlined, ProfileOutlined } from '@ant-design/icons';
+import { EditOutlined, InteractionOutlined, ProfileOutlined } from '@ant-design/icons';
 import { ToolStatusEnum } from '../OperatorList/types';
 
 const { Panel } = Collapse;
 
-export default function ToolInfo({ selectedTool, type }: any) {
+export default function ToolInfo({ selectedTool }: any) {
+  const [activeKey, setActiveKey] = useState<string[]>([]);
+  const isExist = useMemo(() => Boolean(selectedTool?.metadata?.version), [selectedTool?.metadata?.version]);
+
+  useEffect(() => {
+    if (!isExist) {
+      // 工具不存在，只显示信息，所以要默认展开信息Panel
+      setActiveKey(['1']);
+    }
+  }, [isExist]);
+
   const onChange = (checked: boolean) => {
     console.log(`switch to ${checked}`);
   };
@@ -17,9 +27,10 @@ export default function ToolInfo({ selectedTool, type }: any) {
     <div className="operator-info">
       <Collapse
         ghost
-        defaultActiveKey={''}
+        activeKey={activeKey}
         expandIconPosition="end"
         className="operator-details-collapse"
+        onChange={setActiveKey}
       >
         <Panel
           key="1"
@@ -58,17 +69,19 @@ export default function ToolInfo({ selectedTool, type }: any) {
             </div>
           </div>
         </Panel>
-        <Panel
-          key="2"
-          header={
-            <span>
-              <InteractionOutlined /> 输入输出{' '}
-            </span>
-          }
-        >
-          <JsonschemaTab operatorInfo={selectedTool} type="Inputs" />
-          <JsonschemaTab operatorInfo={selectedTool} type="Outputs" />
-        </Panel>
+        {isExist && (
+          <Panel
+            key="2"
+            header={
+              <span>
+                <InteractionOutlined /> 输入输出{' '}
+              </span>
+            }
+          >
+            <JsonschemaTab operatorInfo={selectedTool} type="Inputs" />
+            <JsonschemaTab operatorInfo={selectedTool} type="Outputs" />
+          </Panel>
+        )}
       </Collapse>
     </div>
   );

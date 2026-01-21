@@ -2,7 +2,7 @@ import type React from 'react';
 import { useMemo, useCallback, useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import classNames from 'classnames';
-import { Layout, Button, Typography, message, Switch, Checkbox, Empty } from 'antd';
+import { Layout, Button, Typography, message, Switch, Checkbox, Empty, Tag } from 'antd';
 import { BarsOutlined, PlusOutlined } from '@ant-design/icons';
 import { FixedSizeList as List } from 'react-window';
 import './style.less';
@@ -217,7 +217,15 @@ export default function ToolDetail() {
                 {item.name}
               </Paragraph>
               {/* <Text >{item.name}</Text> */}
-              <MethodTag status={item.metadata?.method} style={{ height: '22px' }} />
+              {item.metadata?.method ? (
+                <MethodTag status={item.metadata?.method} style={{ height: '22px' }} />
+              ) : (
+                !item.metadata?.version && (
+                  <Tag color="default" bordered={false} style={{ color: 'red' }}>
+                    已删除
+                  </Tag>
+                )
+              )}
 
               <Switch
                 size="small"
@@ -227,7 +235,7 @@ export default function ToolDetail() {
                   changeStatus([item]);
                 }}
                 style={{ marginLeft: 'auto' }}
-                disabled={action !== OperateTypeEnum.Edit}
+                disabled={action !== OperateTypeEnum.Edit || !item.metadata?.version}
               />
             </div>
             <Paragraph className="side-list-item-desc" ellipsis={{ rows: 1 }} title={item.description}>
@@ -446,7 +454,7 @@ export default function ToolDetail() {
             {/* 右侧内容区域 */}
             <Content style={{ background: 'white', borderRadius: '8px' }}>
               <ToolInfo selectedTool={selectedTool} />
-              {permissionCheckInfo?.includes(PermConfigTypeEnum.Execute) && (
+              {selectedTool?.metadata?.version && permissionCheckInfo?.includes(PermConfigTypeEnum.Execute) && (
                 <div id="targetDiv">
                   <DebugResult selectedTool={selectedTool} type={OperatorTypeEnum.ToolBox} />
                 </div>
